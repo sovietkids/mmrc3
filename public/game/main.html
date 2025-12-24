@@ -516,12 +516,7 @@
             });
 
             socket.on('player_death', (data) => {
-                gameState = 'map';
-                ui.battleUi.classList.add('hidden');
-                sfx.damage(); 
-                log(`死んでしまった... (EXPリセット)`, 'warning');
-                player = data.player;
-                updatePlayerStats();
+                window.location.reload();
             });
         }
 
