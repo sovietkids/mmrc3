@@ -1,0 +1,169 @@
+{
+  "general": {
+    "name": "雑談",
+    "messages": [
+      {
+        "type": "public",
+        "text": "banana",
+        "username": "運営",
+        "socketId": "ErEHCbndgV6qTS8ZAAAB",
+        "messageId": "1765682610824-0.33833460646303326",
+        "parentId": null,
+        "threadId": "general",
+        "timestamp": "2025-12-14T03:23:30.824Z"
+      },
+      {
+        "text": "わああああ",
+        "username": "w",
+        "timestamp": "2025-12-19T23:27:57.918Z"
+      },
+      {
+        "text": "ふぁ",
+        "username": "ｆ",
+        "timestamp": "2025-12-19T23:35:40.445Z"
+      },
+      {
+        "text": "ふぁ",
+        "username": "ｆ",
+        "timestamp": "2025-12-19T23:35:47.502Z"
+      },
+      {
+        "text": "ふぁ",
+        "username": "ファイルを",
+        "timestamp": "2025-12-19T23:39:44.846Z"
+      },
+      {
+        "text": "ふぁ",
+        "username": "ファイルを",
+        "timestamp": "2025-12-19T23:39:45.742Z"
+      },
+      {
+        "text": "ふぁ",
+        "username": "ファイルを",
+        "timestamp": "2025-12-19T23:39:46.510Z"
+      },
+      {
+        "text": "ふぁ",
+        "username": "ファイルを",
+        "timestamp": "2025-12-19T23:39:46.547Z"
+      },
+      {
+        "text": "ふぁ",
+        "username": "ファイルを",
+        "timestamp": "2025-12-19T23:39:48.065Z"
+      },
+      {
+        "text": "ふぁ",
+        "username": "ファイルを",
+        "timestamp": "2025-12-19T23:39:48.067Z"
+      },
+      {
+        "text": "ふぁ",
+        "username": "ファイルを",
+        "timestamp": "2025-12-19T23:39:48.078Z"
+      },
+      {
+        "text": "ふぁ",
+        "username": "ふぁ",
+        "timestamp": "2025-12-19T23:43:34.213Z"
+      },
+      {
+        "text": "バナナ",
+        "username": "ga",
+        "timestamp": "2025-12-19T23:44:27.167Z"
+      },
+      {
+        "text": "ええええええ",
+        "username": "ga",
+        "timestamp": "2025-12-19T23:45:15.350Z"
+      }
+    ]
+  },
+  "hobbies": {
+    "name": "趣味",
+    "messages": [
+      {
+        "text": "ふぁあああああああ",
+        "username": "e",
+        "timestamp": "2025-12-19T23:33:02.317Z"
+      }
+    ]
+  },
+  "tech": {
+    "name": "技術",
+    "messages": [
+      {
+        "text": "ふぁああああ",
+        "username": "e",
+        "timestamp": "2025-12-19T23:33:05.541Z"
+      }
+    ]
+  },
+  "--1765682295578": {
+    "name": "誰でも歓迎",
+    "messages": [
+      {
+        "type": "public",
+        "text": "誰でも歓迎けいじばん",
+        "username": "運営",
+        "socketId": "ErEHCbndgV6qTS8ZAAAB",
+        "messageId": "1765682306393-0.053413872889222835",
+        "parentId": null,
+        "threadId": "--1765682295578",
+        "timestamp": "2025-12-14T03:18:26.393Z"
+      },
+      {
+        "type": "public",
+        "text": "http://cube.ssnetwork.io:42799/chat.html",
+        "username": "運営",
+        "socketId": "ErEHCbndgV6qTS8ZAAAB",
+        "messageId": "1765682307377-0.2260592732957898",
+        "parentId": null,
+        "threadId": "--1765682295578",
+        "timestamp": "2025-12-14T03:18:27.377Z"
+      },
+      {
+        "type": "public",
+        "text": "わーい",
+        "username": "わーい",
+        "socketId": "8I8OFmtg_CedcJWqAAAB",
+        "messageId": "1766095631824-0.03872743117880395",
+        "parentId": null,
+        "threadId": "--1765682295578",
+        "timestamp": "2025-12-18T22:07:11.824Z"
+      }
+    ]
+  },
+  "わあ-1766186881995": {
+    "name": "わあ",
+    "messages": []
+  },
+  "あ-1766187179362": {
+    "name": "あ",
+    "messages": []
+  },
+  "えあ-1766187342550": {
+    "name": "えあ",
+    "messages": []
+  },
+  "ふぇあ-1766187593715": {
+    "name": "ふぇあ",
+    "messages": []
+  },
+  "ふぁ-1766187670915": {
+    "name": "ふぁ",
+    "messages": []
+  },
+  "ふぁ-1766187745709": {
+    "name": "ふぁ",
+    "messages": []
+  },
+  "が-1766187920587": {
+    "name": "が",
+    "messages": []
+  },
+  "が-1766188014078": {
+    "name": "が",
+    "messages": []
+  }
+}
