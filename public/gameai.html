@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+
+<title>Learning PvP AI (Dual Learning)</title>
+<style>
+  body { background:#111; color:#eee; font-family:monospace; }
+  canvas { background:#222; display:block; margin:10px 0; }
+</style>
+</head>
+<body>
+<h2>学習型PvP AI（両者学習・完全版）</h2>
+<canvas id="c" width="600" height="140"></canvas>
+<div id="info"></div>
+
+<script>
+// ====== 定数 ======
+const STAGE_MIN = 20;
+const STAGE_MAX = 560;
+
+const MAX_HP = 20;
+const ATTACK_RANGE = 25;
+const DAMAGE = 2;
+const CD = 20;
+const ACTIONS = ["attack","approach","retreat","strafe"];
+
+// ====== Agent ======
+class Agent {
+  constructor(color){
+    this.color = color;
+    this.w = {
+      attack:[1,1,-1,-0.5],
+      approach:[-0.2,0,0.5,0],
+      retreat:[-1,-1,0.2,0.2],
+      strafe:[0.1,0,0,0.5]
+    };
+    this.reset();
+  }
+  reset(){
+    this.hp = MAX_HP;
+    this.x = Math.random()*400+100;
+    this.cd = 0;
+  }
+}
+
+// ====== 環境 ======
+const a = new Agent("cyan");
+const b = new Agent("orange");
+let episode = 0;
+
+function observe(self, enemy){
+  return [
+    Math.abs(self.x-enemy.x)/500,
+    self.hp/MAX_HP,
+    enemy.hp/MAX_HP,
+    self.cd/CD
+  ];
+}
+
+function choose(agent, obs){
+  if(Math.random()<0.05) return ACTIONS[Math.random()*4|0];
+  let best=null, bestScore=-1e9;
+  for(const act of ACTIONS){
+    const s = obs.reduce((r,v,i)=>r+v*agent.w[act][i],0);
+    if(s>bestScore){bestScore=s; best=act;}
+  }
+  return best;
+}
+
+function learn(agent, act, obs, reward){
+  const lr=0.02;
+  agent.w[act]=agent.w[act].map((w,i)=>w+lr*reward*obs[i]);
+}
+
+// ====== Canvas ======
+const cv=document.getElementById('c');
+const ctx=cv.getContext('2d');
+
+function draw(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  drawAgent(a,40);
+  drawAgent(b,90);
+}
+
+function drawAgent(agent,y){
+  ctx.fillStyle=agent.color;
+  ctx.fillRect(agent.x,y,20,20);
+  ctx.fillStyle="#0f0";
+  ctx.fillRect(agent.x,y-6,20*(agent.hp/MAX_HP),4);
+}
+
+// ====== メインループ ======
+function update(self, enemy, act){
+  let reward = 0;
+
+  self.cd = Math.max(0, self.cd - 1);
+  const dist = Math.abs(self.x - enemy.x);
+
+  // 移動
+  if(act==="approach"){
+    self.x += self===a ? 2 : -2;
+    reward += 0.05;
+  }
+  if(act==="retreat"){
+    self.x += self===a ? -2 : 2;
+    reward -= 0.05;
+  }
+  if(act==="strafe"){
+    self.x += Math.random()*2 - 1;
+  }
+
+  // 攻撃
+  if(act==="attack" && self.cd<=0 && dist < ATTACK_RANGE){
+    enemy.hp -= DAMAGE;
+    self.cd = CD;
+    reward += 3.0;
+
+    // ノックバック
+    enemy.x += self===a ? 10 : -10;
+  }
+
+  // 攻撃失敗
+  if(act==="attack" && dist >= ATTACK_RANGE){
+    reward -= 0.2;
+  }
+
+  // 遠すぎる
+  if(dist > ATTACK_RANGE*2){
+    reward -= 0.05;
+  }
+
+  // 端ペナルティ
+  if(self.x <= STAGE_MIN+5 || self.x >= STAGE_MAX-5){
+    reward -= 2;
+  }
+
+  // 時間
+  reward -= 0.05;
+
+  // ステージ制限
+  self.x = Math.max(STAGE_MIN, Math.min(STAGE_MAX, self.x));
+
+  return reward;
+}
+
+
+  // 時間ペナルティ（強化）
+  reward -= 0.05;
+
+  return reward;
+
+  self.x = Math.max(STAGE_MIN, Math.min(STAGE_MAX, self.x));
+  enemy.x += self===a ? 10 : -10;
+
+
+
+function step(){
+  const oa = observe(a,b);
+  const ob = observe(b,a);
+  const aa = choose(a,oa);
+  const ab = choose(b,ob);
+
+  const r1 = update(a,b,aa);
+  const r2 = update(b,a,ab);
+
+  const ra = r1 + (b.hp<=0 ? 5 : 0) - (a.hp<=0 ? 5 : 0);
+  const rb = r2 + (a.hp<=0 ? 5 : 0) - (b.hp<=0 ? 5 : 0);
+
+  learn(a,aa,oa,ra);
+  learn(b,ab,ob,rb);
+
+  draw();
+
+  if(a.hp<=0||b.hp<=0){
+    episode++;
+    a.reset(); b.reset();
+  }
+
+  info.innerText=`Episode: ${episode}`;
+}
+
+setInterval(step,50);
+</script>
+</body>
+</html>

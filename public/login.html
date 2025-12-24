@@ -1,0 +1,28 @@
+<div id="auth"></div>
+<a href="/auth/discord" target="_self">Discordでログイン</a>
+
+<script>
+async function refreshAuth() {
+  const res = await fetch('/api/me');
+  const data = await res.json();
+  const div = document.getElementById('auth');
+
+  if (!data.loggedIn) {
+    div.innerHTML = '<button onclick="login()">Discordでログイン</button>';
+  } else {
+    const u = data.user;
+    div.innerHTML = `${u.username} <button onclick="logout()">ログアウト</button>`;
+  }
+}
+
+function login() {
+  location.href = "/auth/discord";
+}
+
+async function logout() {
+  await fetch('/api/logout', { method: 'POST' });
+  refreshAuth();
+}
+
+refreshAuth();
+</script>

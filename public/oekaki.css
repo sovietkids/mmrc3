@@ -1,0 +1,322 @@
+/*
+ * oekaki.css
+ * Design Concept: Modern Dark Mode / Minimalist (Based on provided mmrc.vercel.app concept)
+ */
+
+/* --- 0. Root Variables & Global Reset (提供されたCSSに基づき設定) --- */
+:root {
+    --bg-color: #1a1a1a;        /* 背景色 */
+    --card-bg-color: #2a2a2a;   /* カード/コントロール背景色 */
+    --primary-color: #0d6efd;   /* 強調色（青） */
+    --text-color: #e0e0e0;      /* メインテキスト色 */
+    --text-muted-color: #888;   /* ミュートテキスト色 */
+    --border-color: #3a3a3a;    /* ボーダー色 */
+    /* 既存のキャンバス背景色に合わせ、少し明るい色を使用 */
+    --canvas-bg-color: #222; 
+    --input-bg-color: #3a3a3a;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    /* 全体をダークモードの背景に */
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    /* 読み込み済みのフォントを優先 */
+    font-family: 'Orbitron', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    /* 要素を中央に配置するためのFlexbox設定 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+/* --- 1. Typography & Headings --- */
+h1 {
+    /* 既存CSSのOrbitronフォントを使用 */
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    color: var(--primary-color); /* 強調色を使用 */
+    margin-bottom: 1rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+p {
+    color: var(--text-color);
+    margin-bottom: 0.5em;
+    font-size: 1rem;
+}
+
+/* --- 2. Controls & Inputs --- */
+
+/* コントロール全体を囲むラッパー（必要であれば） */
+.controls-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: var(--card-bg-color); /* コントロールの背景色 */
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* カラーピッカー */
+input[type="color"]#colorPicker {
+    /* 標準的なボタン/入力要素のスタイルに合わせる */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 40px;
+    height: 40px;
+    padding: 2px;
+    border: 3px solid var(--border-color);
+    border-radius: 50%;
+    cursor: pointer;
+    background: none;
+    transition: border-color 0.3s ease;
+}
+
+input[type="color"]#colorPicker::-webkit-color-swatch {
+    border-radius: 50%;
+    border: none;
+}
+input[type="color"]#colorPicker::-moz-color-swatch {
+    border-radius: 50%;
+    border: none;
+}
+input[type="color"]#colorPicker:hover {
+    border-color: var(--primary-color);
+}
+
+
+/* スピード入力テキストボックス */
+input[type="text"]#speedInput {
+    /* 提供されたCSSのフォームスタイルを適用 */
+    background-color: var(--input-bg-color); 
+    color: var(--text-color); 
+    border: 1px solid var(--border-color); 
+    border-radius: 6px; 
+    padding: 0.4rem;
+    width: 50px !important; /* HTML属性より優先 */
+    text-align: center;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]#speedInput:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+input[type="text"]#TextDrawInput {
+    /* 提供されたCSSのフォームスタイルを適用 */
+    background-color: var(--input-bg-color); 
+    color: var(--text-color); 
+    border: 1px solid var(--border-color); 
+    border-radius: 6px; 
+    padding: 0.4rem;
+    width: 300px !important; /* HTML属性より優先 */
+    text-align: center;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]#TextDrawInput:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+input[type="text"]#TeleportInputX {
+    /* 提供されたCSSのフォームスタイルを適用 */
+    background-color: var(--input-bg-color); 
+    color: var(--text-color); 
+    border: 1px solid var(--border-color); 
+    border-radius: 6px; 
+    padding: 0.4rem;
+    width: 80px !important; /* HTML属性より優先 */
+    text-align: center;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]#TeleportInputX:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+input[type="text"]#TeleportInputY:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+input[type="text"]#TeleportInputY {
+    /* 提供されたCSSのフォームスタイルを適用 */
+    background-color: var(--input-bg-color); 
+    color: var(--text-color); 
+    border: 1px solid var(--border-color); 
+    border-radius: 6px; 
+    padding: 0.4rem;
+    width: 80px !important; /* HTML属性より優先 */
+    text-align: center;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+/* p要素とinput要素を横並びにするための一時的なラッパー */
+body > p {
+    margin-right: 5px; /* スピード: と入力欄の間隔 */
+}
+/* pタグとinputを横並びにするため、両方をラップしてdisplay: flexで中央に配置する */
+body > p, body > input[type="text"]#speedInput {
+    display: inline-block;
+}
+
+
+/* --- 3. Canvas Styling (既存CSSを尊重) --- */
+canvas[id='main'] {
+    /* 既存のスタイルをベースに、変数を使用 */
+    background-color: var(--canvas-bg-color); /* #222 */
+    border: 2px solid var(--border-color); /* #555 の代わりに統一されたボーダー色 */
+    border-radius: 8px;
+    width: 80%;
+    height: 70%; 
+    display: block;
+    cursor: crosshair;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.6); /* 影を強調 */
+    transition: border-color 0.3s ease;
+    /* bodyがflex columnなので、幅を制限しないように */
+    max-width: 100%;
+}
+
+canvas[id='main']:hover {
+    border-color: var(--primary-color); /* ホバーで強調色に */
+}
+
+/* --- 4. Utility (スクロールバー: 提供されたCSSからの流用) --- */
+::-webkit-scrollbar { width: 8px; } 
+::-webkit-scrollbar-track { background: var(--bg-color); } 
+::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; } 
+::-webkit-scrollbar-thumb:hover { background: #666; }
+
+/* --- 5. Button Styles --- */
+button {
+    /* Orbitronフォントを適用して統一感を出す */
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+
+    /* 基本スタイル */
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* 横並び時の余白 */
+    margin: 5px;
+    
+    /* わずかな影 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* プライマリーボタン（決定や保存など） */
+button.primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #ffffff;
+}
+
+/* ホバーエフェクト */
+button:hover {
+    background-color: #4a4a4a;
+    border-color: var(--text-muted-color);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+button.primary:hover {
+    background-color: #0b5ed7; /* 少し濃い青 */
+    border-color: #0a58ca;
+    box-shadow: 0 0 15px rgba(13, 110, 253, 0.4); /* 青いグロー効果 */
+}
+
+/* アクティブ（クリック時）エフェクト */
+button:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* 無効状態のスタイル */
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* --- 6. Teleporter Specific Styles (追加) --- */
+.TXinput, .TYinput {
+    background-color: var(--input-bg-color); 
+    color: var(--text-color); 
+    border: 1px solid var(--border-color); 
+    border-radius: 6px; 
+    padding: 0.4rem;
+    width: 80px; 
+    text-align: center;
+    font-size: 1rem;
+    margin: 0 5px;
+    transition: border-color 0.3s ease;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.TXinput:focus, .TYinput:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* テレポートボタンにアクセントを付ける */
+button[onclick="tp()"] {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    margin-left: 10px;
+}
+
+button[onclick="tp()"]:hover {
+    background-color: #0b5ed7;
+    box-shadow: 0 0 10px rgba(13, 110, 253, 0.5);
+}
+
+/* --- 7. Layout Adjustments (整理) --- */
+
+/* 入力欄のラベルとコントロールの余白を最適化 */
+body > p {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+/* Canvasのサイズ調整（画面に収まりやすくする） */
+
+/* --- 8. Specific ID Styling --- */
+#TextDrawInput {
+    width: 250px;
+    font-family: sans-serif; /* テキスト入力は読みやすさ重視 */
+}
+
+#speedInput {
+    font-family: 'Orbitron', sans-serif;
+}

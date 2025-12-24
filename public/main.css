@@ -1,0 +1,210 @@
+/*
+ * mmrc.vercel.app - main.css
+ * Design Concept: Modern Dark Mode / Minimalist
+ */
+
+/* --- 0. Root Variables & Global Reset --- */
+:root {
+    /* 提供された変数をそのまま使用 */
+    --bg-color: #1a1a1a;
+    --card-bg-color: #2a2a2a;
+    --primary-color: #0d6efd; /* 青色を強調色として使用 */
+    --text-color: #e0e0e0;
+    --text-muted-color: #888;
+    --border-color: #3a3a3a;
+    --dm-color: #2b305c;
+    --reply-bg-color: #222;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    /* SFフォントを排除し、提供されたCSSの標準フォントを使用 */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding-bottom: 50px;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #0c5bda; /* ホバーで少し濃い青 */
+    text-decoration: underline;
+}
+
+/* --- 1. Typography & Headings --- */
+h1, h2, h3, h4, h5, h6 {
+    /* SFフォントを排除 */
+    font-family: inherit; 
+    color: var(--text-color); 
+    margin-bottom: 0.5em;
+    font-weight: 700;
+}
+
+h1 {
+    font-size: 2.2rem;
+    padding-top: 2rem;
+    padding-bottom: 1rem;
+    color: var(--primary-color);
+    font-weight: 800;
+}
+
+p {
+    color: var(--text-color);
+    margin-bottom: 1em;
+}
+
+/* --- 2. Layout & Container --- */
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 1rem;
+    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.container > h1, .container > p:first-of-type {
+    width: 100%;
+}
+
+/* --- 3. Card Styling (Provided Base) --- */
+.card {
+    /* 提供されたCSSの .card スタイルを適用 */
+    background-color: var(--card-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px; 
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+    
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    max-width: 300px;
+    min-height: 380px;
+    text-align: left;
+}
+
+.card:hover {
+    border-color: var(--primary-color); 
+    transform: translateY(-3px);
+}
+
+[data-tilt] {
+    will-change: transform;
+}
+
+.card h4 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    color: rgb(96, 199, 151); /* 提供されたCSSにある強調色を使用 */
+}
+
+.card img {
+    display: block;
+    margin: 1rem auto;
+    border-radius: 4px; /* シンプルな角丸 */
+    object-fit: contain;
+    /* SF風のボーダーやグローを排除 */
+}
+
+/* --- 4. Button Styling (Primary Action Button) --- */
+.button {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    margin-top: auto;
+    background-color: var(--primary-color);
+    color: white;
+    font-family: inherit; /* SFフォントを排除 */
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    text-transform: none; /* 大文字化を排除 */
+    letter-spacing: normal;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.button:hover {
+    background-color: #0c5bda;
+    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.4);
+}
+
+.card a[style] {
+    color: var(--primary-color);
+    margin-top: 10px;
+    display: inline-block !important;
+    width: auto;
+    text-decoration: underline;
+    font-size: 0.9rem;
+}
+
+/* --- 5. Status/Special Text --- */
+.card h4:nth-child(4) { 
+    color: var(--text-muted-color);
+    margin-top: 1rem;
+    font-size: 1rem;
+}
+.card p:last-child { 
+    color: var(--text-muted-color);
+    font-size: 0.85rem;
+    margin-bottom: 0;
+}
+
+
+/* --- 6. Audio Control Button --- */
+#audio-control {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    padding: 0.5rem 1rem;
+    background-color: var(--card-bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+    z-index: 999;
+    font-family: inherit; /* SFフォントを排除 */
+}
+
+#audio-control.muted {
+    color: var(--text-muted-color);
+}
+
+#audio-control:hover:not(.muted) {
+    background-color: #3a3a3a;
+    border-color: var(--primary-color);
+}
+
+/* --- 7. Utility (既存CSSからの流用) --- */
+/* スクロールバーのスタイル */
+::-webkit-scrollbar { width: 8px; } 
+::-webkit-scrollbar-track { background: var(--bg-color); } 
+::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; } 
+::-webkit-scrollbar-thumb:hover { background: #666; } 
+
+/* フォーム要素 (HTMLには無いが、定義を保持) */
+input[id='search-input'], textarea, .create-thread-input { 
+    background-color: #3a3a3a; 
+    color: var(--text-color); 
+    border: 1px solid #555; 
+    border-radius: 8px; 
+    padding: 0.5rem;
+}

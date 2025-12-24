@@ -1,0 +1,21 @@
+<html>
+    <head>
+        <title>自由オンライン超特大お絵描きボード</title>
+        <link rel="icon" href="favicon.ico">
+        <meta charset="UTF-8">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="oekaki.css">
+    </head>
+    <body>
+        <h1>自由オンライン超特大お絵描きボード(FOHDB)</h1>
+        <p>WSDA又は矢印キーで操作、マウス押してお絵描き</p>
+        <p>色選択:<input type="color" id="colorPicker" value="#00aa00"></p>
+        <p>移動スピード:<input type="text" id="speedInput" value="5" style="width: 40px;"></p>
+        <p>テレポーター:<input class="TXinput" id="tpX" type="number" value="0"><input class="TYinput" id="tpY" type="number" value="0"><button onclick="tp()">テレポート！</button></p>
+        <canvas id="main" width="80%" height="50%"></canvas>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="oekaki.js" defer></script>
+    </body>
+</html>
