@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>まんまるAI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    background:#1a1a1a;
+    color:#e0e0e0;
+    font-family:sans-serif;
+    padding:20px;
+}
+.container {
+    max-width:800px;
+    margin:auto;
+}
+.chat-card {
+    background:#2a2a2a;
+    padding:20px;
+    border-radius:12px;
+    height:70vh;
+    display:flex;
+    flex-direction:column;
+}
+#chat {
+    flex:1;
+    overflow-y:auto;
+}
+.user-msg {
+    background:#0d6efd;
+    color:white;
+    padding:10px;
+    border-radius:8px;
+    margin:10px 0;
+    margin-left:auto;
+    max-width:80%;
+}
+.ai-msg {
+    background:#222;
+    padding:10px;
+    border-radius:8px;
+    margin:10px 0;
+    max-width:80%;
+}
+.input-area {
+    display:flex;
+    gap:10px;
+}
+input {
+    flex:1;
+    padding:10px;
+    border-radius:8px;
+    border:none;
+}
+button {
+    padding:10px 15px;
+    border-radius:8px;
+    border:none;
+    background:#0d6efd;
+    color:white;
+    cursor:pointer;
+}
+.mode-buttons {
+    margin-bottom:10px;
+    display:flex;
+    gap:10px;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h1>まんまるAI</h1>
+
+<div class="mode-buttons">
+    <button onclick="setMode('normal')">通常チャット</button>
+    <button onclick="setMode('training')">愚痴トレーニング</button>
+</div>
+
+<div class="chat-card">
+    <div id="chat">
+        <div class="ai-msg">AI: こんにちは。今日はどうされましたか？</div>
+    </div>
+
+    <div class="input-area">
+        <input id="msg" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter') send()">
+        <button onclick="send()">送信</button>
+    </div>
+</div>
+</div>
+
+<script>
+let mode = "normal";
+
+function setMode(m) {
+    mode = m;
+    document.getElementById("chat").innerHTML = "";
+
+    if (m === "training") {
+        sendSystem("START_TRAINING");
+    } else {
+        document.getElementById("chat").innerHTML =
+            `<div class="ai-msg">AI: 通常モードに戻りました。</div>`;
+    }
+}
+
+async function sendSystem(text) {
+    await fetch("/chat", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({message:text, mode:mode, system:true})
+    });
+
+    const chat = document.getElementById("chat");
+    chat.innerHTML += `<div class="ai-msg">AI: （愚痴トレーニング開始）</div>`;
+}
+
+async function send() {
+    const input = document.getElementById("msg");
+    const chat = document.getElementById("chat");
+    const text = input.value;
+    if (!text) return;
+
+    chat.innerHTML += `<div class="user-msg">あなた: ${text}</div>`;
+    input.value = "";
+
+    const res = await fetch("/chat", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({message:text, mode:mode})
+    });
+
+    const data = await res.json();
+    chat.innerHTML += `<div class="ai-msg">AI: ${data.reply}</div>`;
+    chat.scrollTop = chat.scrollHeight;
+}
+</script>
+</body>
+</html>
