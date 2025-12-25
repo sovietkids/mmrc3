@@ -2,720 +2,250 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>まんまる協力タイピングRPG</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>まんまるブレインロッドタイピング</title>
     <style>
+        /* --- 0. Root Variables & Global Reset --- */
         :root {
-            --bg-color: #0a0a0a;
+            --bg-color: #1a1a1a;
+            --card-bg-color: #2a2a2a;
+            --primary-color: #0d6efd; 
             --text-color: #e0e0e0;
-            --primary-color: #00f0ff;
-            --danger-color: #ff0055;
-            --success-color: #00ff99;
-            --warning-color: #ffaa00;
-            --ui-bg: rgba(20, 20, 30, 0.8);
-            --tile-wall: #334;
-            --tile-floor: #556;
-            --tile-grass: #363;
+            --text-muted-color: #888;
+            --border-color: #3a3a3a;
+            --dm-color: #2b305c;
+            --reply-bg-color: #222;
+            --accent-green: rgb(96, 199, 151);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            margin: 0;
             background-color: var(--bg-color);
             color: var(--text-color);
-            font-family: 'Share Tech Mono', monospace;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-image: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%);
-        }
-
-        .hidden { display: none !important; }
-
-        /* Room Selection */
-        #room-overlay {
-            background: var(--ui-bg);
-            padding: 40px;
-            border-radius: 15px;
-            border: 1px solid var(--primary-color);
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
-            text-align: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            align-items: center;
+            justify-content: center;
         }
-        #room-overlay h2 {
-            font-family: 'Orbitron', sans-serif;
+
+        /* --- 1. Typography & Headings --- */
+        h1 {
+            font-size: 2.2rem;
             color: var(--primary-color);
-            margin: 0 0 10px;
+            font-weight: 800;
+            margin-bottom: 1rem;
         }
-        #room-overlay input {
-            background: #111;
-            border: 1px solid #555;
-            color: var(--text-color);
-            padding: 10px;
-            font-family: inherit;
+
+        h3 {
+            color: var(--accent-green);
+            margin-bottom: 1rem;
+        }
+
+        /* --- 2. Layout & Card Styling --- */
+        .card {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px; 
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+            width: 90%;
+            max-width: 500px;
             text-align: center;
         }
-        #room-overlay button {
+
+        .card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        /* --- 3. Form Elements --- */
+        input {
+            background-color: #3a3a3a; 
+            color: var(--text-color); 
+            border: 1px solid #555; 
+            border-radius: 8px; 
+            padding: 0.75rem;
+            font-size: 20px;
             width: 100%;
-        }
-        #room-error {
-            color: var(--danger-color);
-            height: 20px;
-        }
-
-        /* Game UI */
-        #game-ui {
-            width: 90%;
-            max-width: 1200px;
-            height: 90vh;
-            display: grid;
-            grid-template-rows: auto 1fr auto;
-            gap: 20px;
-            position: relative;
+            max-width: 300px;
+            margin-top: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
         }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            background: var(--ui-bg);
-            border: 1px solid #333;
-            border-radius: 8px;
-        }
-        #player-stats { display: flex; gap: 20px; }
-        #player-stats span { color: var(--warning-color); }
-        
-        #hp-bar-container {
-            width: 100px;
-            height: 10px;
-            background: #333;
-            border: 1px solid #555;
-            display: inline-block;
-            margin: 0 5px;
-        }
-        #hp-bar-fill {
-            height: 100%;
-            background: var(--success-color);
-            width: 100%;
-            transition: width 0.3s;
+        input:focus {
+            border-color: var(--primary-color);
         }
 
-        main {
-            position: relative;
-            border: 1px solid #333;
-            background: #000;
-        }
-        #game-canvas {
-            width: 100%;
-            height: 100%;
-            image-rendering: pixelated;
-        }
-
-        footer {
-            height: 80px;
-            background: var(--ui-bg);
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 10px;
-            overflow-y: auto;
-            font-size: 0.9rem;
-        }
-        .log-entry { margin: 2px 0; }
-        .log-damage { color: var(--success-color); }
-        .log-system { color: var(--primary-color); }
-        .log-info { color: #aaa; }
-        .log-exp { color: var(--warning-color); }
-
-        /* Battle UI */
-        #battle-ui {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 40px;
-            z-index: 100;
-        }
-        #enemy-avatar { font-size: 100px; filter: drop-shadow(0 0 20px var(--danger-color)); }
-        #enemy-name { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; color: var(--danger-color); }
-        #enemy-hp-bar-container { width: 300px; height: 20px; background: #333; border-radius: 10px; overflow: hidden; }
-        #enemy-hp-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--danger-color), #ff5e00); transition: width 0.2s ease-out; }
-        #typing-area { background: rgba(0,0,0,0.6); padding: 30px 50px; border-radius: 15px; border: 1px solid var(--primary-color); }
-        #target-word { font-size: 3rem; letter-spacing: 5px; user-select: none; }
-        .char-correct { color: var(--success-color); }
-        .char-pending { color: #666; }
-        .char-active { text-decoration: underline; }
-        
-        /* Damage Shake Effect */
-        .shake { animation: shake 0.5s; }
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
-        }
-
-        button {
-            background: var(--primary-color);
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            font-size: 1.2rem;
-            font-family: 'Orbitron', sans-serif;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: transform 0.2s;
-        }
-        button:hover { transform: scale(1.1); box-shadow: 0 0 20px var(--primary-color); }
-
-        /* Level Up Effect */
-        #level-up-overlay {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 6rem;
+        #word_display {
+            font-size: 1.5rem;
+            margin: 1rem 0;
             font-weight: bold;
-            color: #ffeb3b;
-            text-shadow: 0 0 10px #ffeb3b, 0 0 20px #ff9800, 0 0 40px #ff5722;
-            pointer-events: none;
-            z-index: 2000;
-            opacity: 0;
         }
-        .levelup-anim { animation: levelUpAnim 2.5s ease-out forwards; }
-        @keyframes levelUpAnim {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-            15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-            30% { transform: translate(-50%, -50%) scale(1.0); }
-            80% { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+
+        #result_display {
+            margin-top: 10px;
+            min-height: 1.5em;
+            color: var(--text-muted-color);
         }
+
+        /* --- 4. Utility --- */
+        ::-webkit-scrollbar { width: 8px; } 
+        ::-webkit-scrollbar-track { background: var(--bg-color); } 
+        ::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; } 
     </style>
 </head>
 <body>
 
-    <div id="room-overlay">
-        <h2>協力タイピングRPG</h2>
-        <input id="room-name-input" placeholder="部屋の名前を入力..." autocomplete="off">
-        <div style="display: flex; gap: 10px;">
-            <button id="create-room-btn">部屋を作る</button>
-            <button id="join-room-btn">部屋に入る</button>
-        </div>
-        <p id="room-error"></p>
-        <div style="margin-top: 20px; font-size: 0.9rem; color: #aaa; text-align: left; display: inline-block; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px;">
-            <div style="color: var(--primary-color); margin-bottom: 5px;">【操作方法】</div>
-            <div>移動: WSDAキー</div>
-            <div>戦闘: 表示された単語をタイピング</div>
-            <div>BGM: 魔王魂様</div>
-        </div>
-    </div>
+    <h1>まんまるブレインロッドタイピング</h1>
 
-    <div id="level-up-overlay">LEVEL UP!</div>
+    <div class="card">
+        <p>
+            5分間でどれだけタイピングできるかな？<br>
+            制限時間は5分です。
+        </p>
+        
+        <h3 id="point">得点: 0</h3>
+        
+        <p id="word_display">ここに単語が表示されます</p>
+        
+        <input type="text" id="typing_input" placeholder="ここに入力してください" autocomplete="off" oninput="handleInput()">
+        
+        <p id="result_display"></p>
 
-    <div id="game-ui" class="hidden">
-        <header>
-            <div id="player-stats">
-                <span>Lv: <span id="player-level">1</span></span>
-                <span>HP: <div id="hp-bar-container"><div id="hp-bar-fill"></div></div><span id="player-hp">100</span>/<span id="player-max-hp">100</span></span>
-                <span>EXP: <span id="player-exp">0</span>/<span id="player-next-exp">100</span></span>
-            </div>
-            <div>部屋: <span id="current-room-name"></span> | ONLINE: <span id="player-count">1</span></div>
-        </header>
-
-        <main>
-            <canvas id="game-canvas"></canvas>
-        </main>
-
-        <footer id="log">
-            <div class="log-entry log-system">サーバーに接続中...</div>
-        </footer>
-    </div>
-
-    <div id="battle-ui" class="hidden">
-        <div style="position: absolute; top: 20px; left: 20px; color: white; font-size: 1.5rem; font-family: 'Orbitron', sans-serif;">
-            HP: <span id="battle-player-hp" style="color: var(--success-color);"></span> / <span id="battle-player-max-hp"></span>
-        </div>
-        <div id="enemy-container" style="text-align: center;">
-            <div id="enemy-avatar"></div>
-            <div id="enemy-name"></div>
-            <div id="enemy-hp-bar-container"><div id="enemy-hp-fill"></div></div>
-        </div>
-        <div id="typing-area">
-            <div id="target-word"></div>
+                <div id="audio_controls" style="margin-top:12px;">
+            <button id="bgm_toggle">BGM: 再生</button>
+            <button id="mute_toggle">音: ON</button>
         </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        // --- Game Configuration ---
-        const TILE_SIZE = 32;
-        const MOVE_INTERVAL = 150; // 移動間隔(ms)
+<script>
+let point = 0;
 
-        // --- State ---
-        let socket;
-        let gameState = 'lobby'; // lobby, map, battle
-        let player = {};
-        let otherPlayers = {};
-        let tileMap = [];
-        let items = {};
-        let currentWord = "";
-        let typedIndex = 0;
-        let lastMoveTime = 0;
-        let colors = {};
+const word_display = document.getElementById("word_display");
+const typing_input = document.getElementById("typing_input");
+const result_display = document.getElementById("result_display");
 
-        // --- DOM Elements ---
-        const ui = {
-            roomOverlay: document.getElementById('room-overlay'),
-            gameUi: document.getElementById('game-ui'),
-            battleUi: document.getElementById('battle-ui'),
-            roomNameInput: document.getElementById('room-name-input'),
-            createRoomBtn: document.getElementById('create-room-btn'),
-            joinRoomBtn: document.getElementById('join-room-btn'),
-            roomError: document.getElementById('room-error'),
-            canvas: document.getElementById('game-canvas'),
-            log: document.getElementById('log'),
-            playerCount: document.getElementById('player-count'),
-            currentRoomName: document.getElementById('current-room-name'),
-            playerLevel: document.getElementById('player-level'),
-            playerHp: document.getElementById('player-hp'),
-            playerMaxHp: document.getElementById('player-max-hp'),
-            playerExp: document.getElementById('player-exp'),
-            playerNextExp: document.getElementById('player-next-exp'),
-            enemyAvatar: document.getElementById('enemy-avatar'),
-            enemyName: document.getElementById('enemy-name'),
-            enemyHpFill: document.getElementById('enemy-hp-fill'),
-            battlePlayerHp: document.getElementById('battle-player-hp'),
-            battlePlayerMaxHp: document.getElementById('battle-player-max-hp'),
-            targetWord: document.getElementById('target-word'),
-        };
-        const ctx = ui.canvas.getContext('2d');
+const typing_word = [
+  "ばれりーなかぷちーな",
+  "すきびでぃどっぱどっぷ",
+  "とらられろとらら",
+  "ぼんばるでぃーろくろこでぃーろ",
+  "ぶるぶるぶらたぶらた",
+  "とぅんとぅんとぅんさふーる",
+  "らりらりらんば",
+  "ちんがりんぐりーに",
+  "ぷるぷるぷらちーの",
+  "ばらばらばるべりーの",
+  "ふりんふりんふらんちぇすこ",
+  "ぐらぐらぐらっつぃえ",
+  "ぴんぐぃんぐぃんぐぃーに",
+  "ぶらぼぶらぼぶらーぼ",
+  "すぱげってぃまえすとろ",
+  "ぴっつぁろまーの",
+  "じぇらーとまじしゃん",
+  "かるぼなーらきんぐ",
+  "らざにあごーれむ",
+  "のっきーなふぇありー",
+  "まんまるはへいさされた",
+  "ふぁんたじっくふぃーりあ",
+];
 
-        // --- Sound Manager (Audio Files) ---
-        // ※実際のファイル名に合わせてパスを調整してください
-        const AUDIO_BASE = '/game/audio';
-        const sounds = {
-            bgm: {
-                map: new Audio(`${AUDIO_BASE}/bgm/map.mp3`),
-                battle: new Audio(`${AUDIO_BASE}/bgm/battle.mp3`)
-            },
-            se: {
-                type: new Audio(`${AUDIO_BASE}/se/type.mp3`),
-                hit: new Audio(`${AUDIO_BASE}/se/hit.mp3`),
-                damage: new Audio(`${AUDIO_BASE}/se/damage.mp3`),
-                clear: new Audio(`${AUDIO_BASE}/se/clear.mp3`),
-                step: new Audio(`${AUDIO_BASE}/se/step.mp3`),
-                levelup: new Audio(`${AUDIO_BASE}/se/levelup.mp3`)
-            }
-        };
+nextWord();
 
-        // BGM設定
-        Object.entries(sounds.bgm).forEach(([key, audio]) => {
-            audio.loop = true;
-            audio.volume = 0.3;
-            audio.onerror = () => console.error(`BGM読み込みエラー: ${key}`, audio.src);
-        });
-        Object.entries(sounds.se).forEach(([key, audio]) => {
-            audio.volume = 0.5;
-            audio.onerror = () => console.error(`SE読み込みエラー: ${key}`, audio.src);
-        });
+function getRandomWord() {
+    return typing_word[Math.floor(Math.random() * typing_word.length)];
+}
 
-        let currentBgm = null;
+function nextWord() {
+    typing_input.value = "";
+    result_display.textContent = "";
+    word_display.textContent = getRandomWord();
+    typing_input.focus();
+}
 
-        const playSound = (name) => {
-            const audio = sounds.se[name];
-            if (audio) {
-                audio.currentTime = 0;
-                audio.play().catch(() => {});
-            }
-        };
+// --- Audio setup ---
+const bgm = new Audio("audio/bgm/battle.mp3");
+bgm.loop = true;
+bgm.volume = 0.4;
+let bgmPlaying = false;
+let audioMuted = false;
 
-        const sfx = {
-            play: playSound,
-            playBgm: (name) => {
-                const nextBgm = sounds.bgm[name];
-                if (currentBgm === nextBgm) return;
-                
-                if (currentBgm) {
-                    currentBgm.pause();
-                    currentBgm.currentTime = 0;
-                }
-                if (nextBgm) {
-                    currentBgm = nextBgm;
-                    nextBgm.play().catch(e => console.log('BGM play failed:', e));
-                }
-            },
-            type: () => playSound('type'),
-            hit: () => playSound('hit'),
-            damage: () => playSound('damage'),
-            clear: () => playSound('clear'),
-            step: () => playSound('step'),
-            levelup: () => playSound('levelup'),
-            unlock: () => {
-                // ブラウザの自動再生制限を解除するために、ユーザー操作時に空再生を行う
-                const unlockAudio = (audio) => {
-                    const originalVolume = audio.volume;
-                    audio.volume = 0;
-                    audio.play().then(() => {
-                        audio.pause();
-                        audio.currentTime = 0;
-                        audio.volume = originalVolume;
-                    }).catch(() => {});
-                };
-                Object.values(sounds.bgm).forEach(unlockAudio);
-                Object.values(sounds.se).forEach(unlockAudio);
-            }
-        };
+const seType = new Audio("audio/se/type.mp3");
+const seClear = new Audio("audio/se/clear.mp3");
+const seHit = new Audio("audio/se/hit.mp3");
 
-        // --- Initialization ---
-        window.onload = () => {
-            // Initialize colors from CSS variables
-            const style = getComputedStyle(document.documentElement);
-            colors = {
-                wall: style.getPropertyValue('--tile-wall').trim(),
-                floor: style.getPropertyValue('--tile-floor').trim(),
-                grass: style.getPropertyValue('--tile-grass').trim()
-            };
-            try {
-                socket = io();
-                setupSocket();
-                setupLobby();
-            } catch (e) {
-                alert("サーバーに接続できませんでした。ページをリロードしてください。");
-                console.error("Socket.io connection failed:", e);
-            }
-        };
+[bgm, seType, seClear, seHit].forEach(a => { a.preload = "auto"; });
 
-        function setupLobby() {
-            ui.createRoomBtn.onclick = () => joinRoom(true);
-            ui.joinRoomBtn.onclick = () => joinRoom(false);
-            ui.roomNameInput.onkeydown = (e) => { if (e.key === 'Enter') joinRoom(false); };
-        }
+function startBgmIfNeeded() {
+    if (!bgmPlaying && !audioMuted) {
+        bgm.play().then(()=> { bgmPlaying = true; document.getElementById("bgm_toggle").textContent = "BGM: 停止"; }).catch(()=>{});
+    }
+}
 
-        function joinRoom(isCreating) {
-            sfx.unlock(); // 音声再生の許可を得る
-            const roomName = ui.roomNameInput.value.trim();
-            if (!roomName) {
-                ui.roomError.textContent = "部屋の名前を入力してください。";
-                return;
-            }
-            const event = isCreating ? 'create_room' : 'join_room';
-            socket.emit(event, { roomName });
-        }
-
-        function setupSocket() {
-            socket.on('connect', () => log('サーバーに接続しました。', 'system'));
-            socket.on('disconnect', () => {
-                alert("サーバーとの接続が切れました。");
-                location.reload();
-            });
-
-            socket.on('room_error', (data) => ui.roomError.textContent = data.message);
-
-            socket.on('game_start', (data) => {
-                log(`部屋「${data.roomName}」に参加しました。`, 'system');
-                gameState = 'map';
-                player = data.player;
-                otherPlayers = data.otherPlayers;
-                tileMap = data.tileMap;
-                items = data.items || {};
-                ui.currentRoomName.textContent = data.roomName;
-
-                ui.roomOverlay.classList.add('hidden');
-                ui.gameUi.classList.remove('hidden');
-
-                resizeCanvas();
-                window.addEventListener('resize', resizeCanvas);
-                document.addEventListener('keydown', handleKeyDown);
-                sfx.playBgm('map');
-                updatePlayerStats(); // 初期HPバー表示のため
-                gameLoop();
-            });
-
-            socket.on('state_update', (data) => {
-                otherPlayers = data.otherPlayers;
-                ui.playerCount.textContent = Object.keys(otherPlayers).length + 1;
-            });
-
-            socket.on('item_collected', (data) => {
-                const key = `${data.x},${data.y}`;
-                if (items[key]) delete items[key];
-                
-                if (data.playerId === socket.id) {
-                    player.hp = data.playerHp;
-                    updatePlayerStats();
-                    log(`ポーションを拾って ${data.recovered} 回復した！`, 'success');
-                    sfx.clear(); // アイテム取得音として使用
-                }
-            });
-
-            socket.on('battle_start', (data) => {
-                gameState = 'battle';
-                ui.battleUi.classList.remove('hidden');
-                updateBattleUI(data.battleState);
-                sfx.damage(); // Encounter sound
-                sfx.playBgm('battle');
-                log(`「${data.battleState.enemy.name}」が現れた！`, 'warning');
-            });
-
-            socket.on('battle_update', (data) => {
-                updateBattleUI(data.battleState);
-                
-                // プレイヤー情報の同期 (HP更新など)
-                if (data.players) {
-                    // 自分以外のプレイヤー更新
-                    const newOtherPlayers = { ...data.players };
-                    if (newOtherPlayers[socket.id]) {
-                        player = newOtherPlayers[socket.id]; // 自分のステータス更新
-                        delete newOtherPlayers[socket.id];
-                    }
-                    otherPlayers = newOtherPlayers;
-                    updatePlayerStats();
-                }
-
-                if (data.log) {
-                    if (data.log.type === 'warning') {
-                        ui.gameUi.classList.add('shake');
-                        setTimeout(() => ui.gameUi.classList.remove('shake'), 500);
-                        sfx.damage();
-                    }
-                    log(data.log.message, data.log.type);
-                }
-            });
-
-            socket.on('battle_end', (data) => {
-                gameState = 'map';
-                ui.battleUi.classList.add('hidden');
-                sfx.clear();
-                sfx.playBgm('map');
-                log(`「${data.enemyName}」を倒した！`, 'success');
-                log(`${data.expGained}の経験値を獲得した！`, 'exp');
-                
-                const oldLevel = player.level;
-                player = data.player; // Update player stats (level, exp, etc.)
-                if (player.level > oldLevel) {
-                    showLevelUp();
-                }
-                updatePlayerStats();
-            });
-
-            socket.on('player_death', (data) => {
-                window.location.reload();
-            });
-        }
-
-        // --- Game Loop & Drawing ---
-        function gameLoop() {
-            if (gameState === 'lobby') return;
-            
-            if (gameState === 'map') {
-                processMapInput();
-            }
-
-            ctx.clearRect(0, 0, ui.canvas.width, ui.canvas.height);
-            drawMap();
-            drawPlayers();
-            requestAnimationFrame(gameLoop);
-        }
-
-        function resizeCanvas() {
-            ui.canvas.width = ui.canvas.clientWidth;
-            ui.canvas.height = ui.canvas.clientHeight;
-        }
-
-        function drawMap() {
-            if (!tileMap.length) return;
-            const mapWidth = tileMap[0].length;
-            const mapHeight = tileMap.length;
-            
-            // Camera Logic
-            const camX = Math.max(0, Math.min((player.x * TILE_SIZE) - (ui.canvas.width / 2), (mapWidth * TILE_SIZE) - ui.canvas.width));
-            const camY = Math.max(0, Math.min((player.y * TILE_SIZE) - (ui.canvas.height / 2), (mapHeight * TILE_SIZE) - ui.canvas.height));
-
-            ctx.save();
-            ctx.translate(-camX, -camY);
-
-            for (let y = 0; y < mapHeight; y++) {
-                for (let x = 0; x < mapWidth; x++) {
-                    // Optimization: Only draw visible tiles
-                    if (x * TILE_SIZE < camX - TILE_SIZE || x * TILE_SIZE > camX + ui.canvas.width ||
-                        y * TILE_SIZE < camY - TILE_SIZE || y * TILE_SIZE > camY + ui.canvas.height) continue;
-
-                    switch (tileMap[y][x]) {
-                        case 1: ctx.fillStyle = colors.wall; break;
-                        case 2: ctx.fillStyle = colors.grass; break;
-                        default: ctx.fillStyle = colors.floor; break;
-                    }
-                    ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                }
-            }
-
-            // Draw Items
-            for (const key in items) {
-                const [ix, iy] = key.split(',').map(Number);
-                // Optimization: Only draw visible items
-                if (ix * TILE_SIZE < camX - TILE_SIZE || ix * TILE_SIZE > camX + ui.canvas.width ||
-                    iy * TILE_SIZE < camY - TILE_SIZE || iy * TILE_SIZE > camY + ui.canvas.height) continue;
-
-                ctx.fillStyle = '#00ff00'; // Green for potion
-                ctx.beginPath();
-                ctx.arc(ix * TILE_SIZE + TILE_SIZE/2, iy * TILE_SIZE + TILE_SIZE/2, TILE_SIZE/4, 0, Math.PI*2);
-                ctx.fill();
-            }
-            // Context restored in drawPlayers or end of loop
-        }
-
-        function drawPlayers() {
-            // Draw other players
-            for (const id in otherPlayers) {
-                const p = otherPlayers[id];
-                ctx.fillStyle = 'orange';
-                ctx.fillRect(p.x * TILE_SIZE, p.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-            }
-            // Draw self
-            ctx.fillStyle = 'cyan';
-            ctx.fillRect(player.x * TILE_SIZE, player.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-            ctx.restore(); // Restore camera translation
-        }
-
-        // --- Input Handling ---
-        function handleKeyDown(e) {
-            if (gameState === 'battle') {
-                handleBattleInput(e);
-            }
-        }
-
-        const keys = {};
-
-window.addEventListener('keydown', e => {
-    keys[e.key.toLowerCase()] = true;
+// Toggle BGM
+document.getElementById("bgm_toggle").addEventListener("click", () => {
+    if (bgmPlaying) {
+        bgm.pause();
+        bgmPlaying = false;
+        document.getElementById("bgm_toggle").textContent = "BGM: 再生";
+    } else {
+        bgm.play().then(()=> { bgmPlaying = true; document.getElementById("bgm_toggle").textContent = "BGM: 停止"; }).catch(()=>{});
+    }
 });
 
-window.addEventListener('keyup', e => {
-    keys[e.key.toLowerCase()] = false;
+// Mute toggle (affects BGM and SE)
+document.getElementById("mute_toggle").addEventListener("click", () => {
+    audioMuted = !audioMuted;
+    [bgm, seType, seClear, seHit].forEach(a => a.muted = audioMuted);
+    document.getElementById("mute_toggle").textContent = audioMuted ? "音: OFF" : "音: ON";
 });
 
+// Play type sound on keydown for printable keys
+typing_input.addEventListener("keydown", (e) => {
+    if (e.key.length === 1) {
+        seType.currentTime = 0; seType.play().catch(()=>{});
+        startBgmIfNeeded();
+    }
+});
 
-        function processMapInput() {
-            const now = Date.now();
-            if (now - lastMoveTime < MOVE_INTERVAL) return;
-
-            let { x, y } = player;
-            let moved = false;
-
-            if (keys['w'] || keys['arrowup']) { y--; moved = true; }
-            else if (keys['s'] || keys['arrowdown']) { y++; moved = true; }
-            else if (keys['a'] || keys['arrowleft']) { x--; moved = true; }
-            else if (keys['d'] || keys['arrowright']) { x++; moved = true; }
-
-            if (moved) {
-                // Basic collision check
-                if (tileMap[y] && tileMap[y][x] !== 1) {
-                    player.x = x;
-                    player.y = y;
-                    socket.emit('move', { x, y });
-                    sfx.step();
-                    lastMoveTime = now;
-                }
-            }
+typing_input.addEventListener("input", () => {
+    const val = typing_input.value;
+    const target = word_display.textContent;
+    if (val === target) {
+        point++;
+        document.getElementById("point").textContent = "得点: " + point;
+        result_display.textContent = "いいね！";
+        seClear.currentTime = 0; seClear.play().catch(()=>{});
+        nextWord();
+    } else {
+        result_display.textContent = "Fight!";
+        const idx = val.length - 1;
+        if (idx >= 0 && val[idx] !== target[idx]) {
+            seHit.currentTime = 0; seHit.play().catch(()=>{});
         }
+    }
+});
 
-        function handleBattleInput(e) {
-            if (e.key.length > 1) return;
-            e.preventDefault();
-            const targetChar = currentWord[typedIndex];
-            if (e.key === targetChar) {
-                typedIndex++;
-                sfx.type();
-                renderWord();
-                if (typedIndex >= currentWord.length) {
-                    sfx.hit();
-                    socket.emit('word_complete');
-                }
-            }
-        }
+// 初期表示
+nextWord();
 
-        // --- UI Update ---
-        function updatePlayerStats() {
-            ui.playerLevel.textContent = player.level;
-            ui.playerHp.textContent = player.hp;
-            ui.playerMaxHp.textContent = player.maxHp;
-            ui.playerExp.textContent = player.exp;
-            ui.playerNextExp.textContent = player.nextLevelExp;
-            
-            // HP Bar Update
-            const hpPercent = Math.max(0, Math.min(100, (player.hp / player.maxHp) * 100));
-            document.getElementById('hp-bar-fill').style.width = `${hpPercent}%`;
-        }
-
-        function updateBattleUI(battleState) {
-            const { enemy, playerWords } = battleState;
-            ui.enemyAvatar.textContent = enemy.avatar;
-            ui.enemyName.textContent = `${enemy.name} (Lv.${enemy.level})`;
-            const hpPercent = (enemy.hp / enemy.maxHp) * 100;
-            ui.enemyHpFill.style.width = `${hpPercent}%`;
-
-            // 戦闘中のプレイヤーHP更新
-            if (ui.battlePlayerHp) {
-                ui.battlePlayerHp.textContent = player.hp;
-                ui.battlePlayerMaxHp.textContent = player.maxHp;
-            }
-
-            // Get my word
-            const word = playerWords[socket.id] || "";
-            if (word !== currentWord) {
-                currentWord = word;
-                typedIndex = 0;
-                renderWord();
-            }
-        }
-
-        function showLevelUp() {
-            const overlay = document.getElementById('level-up-overlay');
-            overlay.classList.remove('levelup-anim');
-            void overlay.offsetWidth; // trigger reflow
-            overlay.classList.add('levelup-anim');
-            sfx.levelup();
-            log('レベルアップしました！', 'success');
-        }
-
-        function renderWord() {
-            let html = '';
-            for (let i = 0; i < currentWord.length; i++) {
-                if (i < typedIndex) {
-                    html += `<span class="char-correct">${currentWord[i]}</span>`;
-                } else if (i === typedIndex) {
-                    html += `<span class="char-active">${currentWord[i]}</span>`;
-                } else {
-                    html += `<span class="char-pending">${currentWord[i]}</span>`;
-                }
-            }
-            ui.targetWord.innerHTML = html;
-        }
-
-        function log(msg, type = 'info') {
-            const div = document.createElement('div');
-            div.className = `log-entry log-${type}`;
-            div.textContent = `> ${msg}`;
-            ui.log.prepend(div);
-            if (ui.log.children.length > 20) ui.log.lastChild.remove();
-        }
-    </script>
+// 5分制限
+setTimeout(() => {
+    document.getElementById("point").textContent = "制限時間です！あなたの得点は " + point + " 点です。お疲れ様でした！";
+    // Stop BGM if playing
+    if (bgmPlaying) { bgm.pause(); bgmPlaying = false; }
+    // リロード
+    location.reload();
+}, 300000);
+</script>
 </body>
 </html>
