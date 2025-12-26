@@ -1,3 +1,5 @@
+const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));//timeはミリ秒
+
 // =====================
 // カメラ（画面左上が見ているワールド座標）
 // =====================
@@ -87,8 +89,9 @@ draw();
 canvas.addEventListener("mousedown", () => isDrawing = true);
 canvas.addEventListener("mouseup",   () => isDrawing = false);
 canvas.addEventListener("mouseleave",() => isDrawing = false);
+canvas.addEventListener("mousemove", handleMouseMove);
 
-canvas.addEventListener("mousemove", (e) => {
+async function handleMouseMove(e) {
     if (!isDrawing) return;
 
     const rect = canvas.getBoundingClientRect();
@@ -101,9 +104,10 @@ canvas.addEventListener("mousemove", (e) => {
 
     const color = document.getElementById("colorPicker").value;
     edge_positions_renderer.push(worldX, worldY, 15, 15, color);
-
+    await sleep(1000); // 連続描画を防ぐためのウェイト
     upload();
-});
+
+};
 
 // =====================
 // キー入力
