@@ -161,7 +161,13 @@ const typing_word = [
     "かたきうそつきりー"
 ];
 
-nextWord();
+const AutoEnter = new KeyboardEvent('keydown', {
+  key: 'Enter',
+  code: 'Enter',
+  keyCode: 13,
+  which: 13,
+  bubbles: true // イベントをバブリング（親要素へ伝播）させる
+});
 
 function getRandomWord() {
     return typing_word[Math.floor(Math.random() * typing_word.length)];
@@ -227,6 +233,7 @@ typing_input.addEventListener("input", () => {
         document.getElementById("point").textContent = "得点: " + point;
         result_display.textContent = "いいね！";
         seClear.currentTime = 0; seClear.play().catch(()=>{});
+        typing_input.dispatchEvent(AutoEnter); // 日本語変換の確定対策
         nextWord();
     } else {
         result_display.textContent = "Fight!";
@@ -245,8 +252,6 @@ setTimeout(() => {
     document.getElementById("point").textContent = "制限時間です！あなたの得点は " + point + " 点です。お疲れ様でした！";
     // Stop BGM if playing
     if (bgmPlaying) { bgm.pause(); bgmPlaying = false; }
-    // リロード
-    location.reload();
 }, 300000);
 </script>
 </body>
