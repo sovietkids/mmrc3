@@ -330,8 +330,16 @@ io.on('connection', socket => {
       io.emit('update users', Object.keys(users));
     }
   });
-});
 
+  socket.on("gokuhi_auth_request", ({ id, token }) => {
+    console.log("Received gokuhi_auth_request:", id, token);
+    if (token === "manmaru3219" || token === "mannmaru3219") {
+      socket.emit("gokuhi_auth_success", { id });
+    } else {
+      socket.emit("gokuhi_auth_failed", { id });
+    }
+  });
+});
 /* ===============================
  * Start
  * =============================== */
