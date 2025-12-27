@@ -111,11 +111,14 @@
         <p>
             5分間でどれだけタイピングできるかな？<br>
             制限時間は5分です。
+            ローマ字を正確に入力してね！<br>
+            間違えたら効果音が鳴るゾ！ってのは嘘<br>
         </p>
         
         <h3 id="point">得点: 0</h3>
         
         <p id="word_display">ここに単語が表示されます</p>
+        <p id="word_romazi_display">ここにローマ字が表示されます</p>
         
         <input type="text" id="typing_input" placeholder="ここに入力してください" autocomplete="off" oninput="handleInput()">
         
@@ -158,8 +161,40 @@ const typing_word = [
   "まんまるはへいさされた",
   "ふぁんたじっくふぃーりあ",
   "67",
-    "かたきうそつきりー"
+  "かたきうそつきりー",
+  "爆音アキ",
+  "なぽりん"
 ];
+const typing_word_romazi = [
+  "barerinakapuchina",
+  "sukibididoppadoppu",
+  "torararerotorara",
+  "bonbarudirokurokodiro",
+  "buruburuburataburata",
+  "tuntuntunsafuru",
+  "rarirariranba",
+  "chingaringurini",
+  "purupurupurachino",
+  "barabarubaruberino",
+  "furinfurinfuranchesuko",
+  "guraguragurattsie",
+  "pinginginguini",
+  "buraboburaboburabo",
+  "supagettimaesutoro",
+  "pittsaromano",
+  "jeraatomajishan",
+  "karubonaarakingu",
+  "razaniagoremu",
+  "nokkiinafearii",
+  "manmaruhaheisasareta",
+  "fantajikkufiiria",
+  "67",
+  "katakiusotsukirii",
+  "bakuonaki",
+  "naporin",
+  ""
+];
+
 
 const AutoEnter = new KeyboardEvent('keydown', {
   key: 'Enter',
@@ -169,14 +204,12 @@ const AutoEnter = new KeyboardEvent('keydown', {
   bubbles: true // イベントをバブリング（親要素へ伝播）させる
 });
 
-function getRandomWord() {
-    return typing_word[Math.floor(Math.random() * typing_word.length)];
-}
-
 function nextWord() {
+    rondomword_random = Math.floor(Math.random() * typing_word_romazi.length)
+    word_romazi_display.textContent = typing_word_romazi[rondomword_random];
     typing_input.value = "";
     result_display.textContent = "";
-    word_display.textContent = getRandomWord();
+    word_display.textContent = typing_word[rondomword_random];
     typing_input.focus();
 }
 
@@ -227,7 +260,7 @@ typing_input.addEventListener("keydown", (e) => {
 
 typing_input.addEventListener("input", () => {
     const val = typing_input.value;
-    const target = word_display.textContent;
+    const target = word_romazi_display.textContent;
     if (val === target) {
         point++;
         document.getElementById("point").textContent = "得点: " + point;
