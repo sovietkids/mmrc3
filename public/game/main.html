@@ -285,6 +285,7 @@ setTimeout(() => {
     document.getElementById("point").textContent = "制限時間です！あなたの得点は " + point + " 点です。お疲れ様でした！";
     // Stop BGM if playing
     if (bgmPlaying) { bgm.pause(); bgmPlaying = false; }
+    typing_input.disabled = true;
 }, 300000);
 </script>
 </body>
