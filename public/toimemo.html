@@ -4,6 +4,122 @@
 <link rel="icon" href="favicon.ico">
 <title>まんまるの問いメモ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<style>
+    /* --- 0. Root Variables --- */
+:root {
+    --bg-color: #121212;
+    --card-bg-color: #1e1e1e;
+    --primary-color: #4dabf7; /* 清潔感のある青 */
+    --accent-color: #60c797;  /* 問いの記号用 */
+    --text-color: #e0e0e0;
+    --text-muted-color: #a0a0a0;
+    --border-color: #333333;
+    --font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+}
+
+/* --- 1. Global Reset --- */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-family);
+    line-height: 1.7;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* --- 2. Typography --- */
+h1 {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    text-align: center;
+    font-weight: 800;
+}
+
+p {
+    text-align: center;
+    color: var(--text-muted-color);
+    margin-bottom: 3rem;
+    font-size: 0.95rem;
+}
+
+/* --- 3. Section (Day) Container --- */
+/* ulを「○日目」のまとまり（カード）としてスタイリング */
+ul {
+    list-style: none;
+    background-color: var(--card-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 3rem;
+    width: 100%;
+    max-width: 800px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+h4 {
+    font-size: 1.4rem;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border-color);
+    display: inline-block;
+    padding-bottom: 0.2rem;
+}
+
+/* --- 4. Question & Answer (ListItem) --- */
+li {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+li:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+/* 問い（Q：）の部分を強調 */
+li br {
+    display: block;
+    content: "";
+    margin-top: 8px;
+}
+
+/* テキストの「Q：」と「A：」を際立たせる */
+li {
+    color: var(--text-color);
+    font-weight: 400;
+}
+
+/* 装飾的な工夫：行頭の文字色を変える（疑似要素的なアプローチ） */
+li::first-line {
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+/* --- 5. Responsive Design --- */
+@media (max-width: 600px) {
+    body {
+        padding: 1rem;
+    }
+    
+    ul {
+        padding: 1.5rem;
+    }
+    
+    h1 {
+        font-size: 1.6rem;
+    }
+}
+</style>
 </head>
 <body>
 <h1>まんまるの問いメモ</h1>

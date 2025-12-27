@@ -131,15 +131,15 @@
     <div class="auth-container">
         <h1>秘密コマンド</h1>
         <input id="pwd" type="password" placeholder="パスワードを入力">
-        <button id="btn">実行</button>
+        <button onclick="checkAndRun()">実行</button>
         <p id="msg"></p>
     </div>
-
+    <script src="/socket.io/socket.io.js"></script>
     <script>
-        const DEBUG = false;
+        const socket = io();
 
-        (function () {
-            // パスワードは元のコードから抽出 (atobでデコード)
+        const DEBUG = false;
+        // パスワードは元のコードから抽出 (atobでデコード)
             const ok1 = "manmaru3219"; 
             const ok2 = "mannmaru3219";
 
@@ -148,33 +148,52 @@
             }
 
             const input = document.getElementById("pwd");
-            const btn = document.getElementById("btn");
             const msg = document.getElementById("msg");
+            const id = crypto.randomUUID();
+            console.log("DEBUG: Generated id =", id);
+            function checkAndRun() {
+                socket.emit("gokuhi_auth_request", { id: id, token: input.value });
+            }
 
-            btn.addEventListener("click", checkAndRun);
+            function success(){
+                const val = input.value || "";
+                msg.classList.remove("error");
+                msg.classList.add("success");
+                msg.textContent = "✅ 成功！秘密モード起動！";
+                // sfx.success.play(); // サウンドエフェクト削除
+                localStorage.setItem('gokuhi_authenticated', 'true');
+                setTimeout(() => {
+                    window.location.href = `gokuhi.html`;
+                }, 1000);
+            }
+
+            function error(){
+                msg.classList.remove("success");
+                msg.classList.add("error");
+                msg.textContent = "❌ パスワードが違います。";
+                // sfx.error.play(); // サウンドエフェクト削除
+            }
 
             // Enter でも送れるようにする
             input.addEventListener("keydown", function(e){
                 if (e.key === "Enter") checkAndRun();
             });
 
-            function checkAndRun(){
-                const val = input.value || "";
-                if (val === ok1 || val === ok2) {
-                    msg.classList.remove("error");
-                    msg.classList.add("success");
-                    msg.textContent = "✅ 成功！秘密モード起動！";
-                    // sfx.success.play(); // サウンドエフェクト削除
-                    localStorage.setItem('gokuhi_authenticated', 'true');
-                    setTimeout(() => location.href = "gokuhi.html", 1000);
+            socket.on("gokuhi_auth_success", ({ id: resId }) => {
+                if (resId === id) {
+                    success();
                 } else {
-                    msg.classList.remove("success");
-                    msg.classList.add("error");
-                    msg.textContent = "❌ パスワードが違います。";
-                    // sfx.error.play(); // サウンドエフェクト削除
+                    if (DEBUG) console.log("DEBUG: Ignored success for different id", resId);
                 }
-            }
-        })();
+            });
+
+            socket.on("gokuhi_auth_failed", ({ id: resId }) => {
+                if (resId === id) {
+                    error();
+                } else {
+                    if (DEBUG) console.log("DEBUG: Ignored failure for different id", resId);
+                }
+            });
     </script>
 </body>
 </html>
