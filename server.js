@@ -272,7 +272,7 @@ function roomID_generate() {
  * Socket.IO
  * =============================== */
 io.on('connection', socket => {
-    io.emit(
+      io.emit(
       'threads updated',
       Object.fromEntries(
         Object.keys(threads).map(k => [k, { name: threads[k].name }])
@@ -332,6 +332,7 @@ io.on('connection', socket => {
     io.to(t).emit('chat message', m);
     safeWriteJSON(messagesFile, threads);
   });
+  console.log('New client connected:', socket.id);
 
   socket.on('uploadList', list => {
     drawingData = list;
