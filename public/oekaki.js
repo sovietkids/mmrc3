@@ -63,18 +63,16 @@ function draw() {
     );
 
     // 描画
-    for (let i = 0; i < edge_positions_renderer.length; i += 5) {
+    for (let i = 0; i < edge_positions_renderer.length; i += 3) {
         const worldX = edge_positions_renderer[i];
         const worldY = edge_positions_renderer[i + 1];
-        const w      = edge_positions_renderer[i + 2];
-        const h      = edge_positions_renderer[i + 3];
-        const color  = edge_positions_renderer[i + 4];
+        const color  = edge_positions_renderer[i + 2];
 
         const draw_x = worldX - camera_x;
         const draw_y = worldY - camera_y;
 
         ctx.fillStyle = color;
-        ctx.fillRect(draw_x, draw_y, w, h);
+        ctx.fillRect(draw_x, draw_y, 15, 15);
     }
 
     requestAnimationFrame(draw);
@@ -103,7 +101,7 @@ async function handleMouseMove(e) {
     const worldY = y + camera_y;
 
     const color = document.getElementById("colorPicker").value;
-    edge_positions_renderer.push(worldX, worldY, 15, 15, color);
+    edge_positions_renderer.push(worldX, worldY, color);
     await sleep(1000); // 連続描画を防ぐためのウェイト
     upload();
 
@@ -176,6 +174,29 @@ function TextDraw() {
       ctx.fillText(textInput.value, camera_x, camera_y);
       console.log("テキスト描画:", textInput.value);
 };
+
+function json_export() {
+    // 1. JSON文字列に変換（null, 2 を入れると整形されて読みやすくなります）
+    const dataStr = JSON.stringify(edge_positions_renderer, null, 2);
+    
+    // 2. Blobオブジェクトを作成（大容量でも安定します）
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const exportFileDefaultName = 'oekaki_data.json';
+    const linkElement = document.createElement('a');
+    
+    linkElement.href = url;
+    linkElement.download = exportFileDefaultName;
+    
+    // 3. 確実にクリックイベントを発火させ、終わったらメモリを解放する
+    document.body.appendChild(linkElement); // 一時的にDOMに追加（Firefox対策）
+    linkElement.click();
+    document.body.removeChild(linkElement);
+    URL.revokeObjectURL(url); // メモリ解放
+}
+
+document.getElementById("exportButton").addEventListener("click", json_export);
 
 // =====================
 // socket 通信
