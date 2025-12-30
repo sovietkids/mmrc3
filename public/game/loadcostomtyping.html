@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>まんまるタイピング</title>
+    <style>
+        /* --- 0. Root Variables & Global Reset --- */
+        :root {
+            --bg-color: #121212;
+            --card-bg-color: #1e1e1e;
+            --primary-color: #3d5afe; /* 落ち着いたブルー */
+            --accent-color: #00e676;  /* 控えめなグリーン */
+            --error-color: #ff5252;   /* ミス時 */
+            --text-color: #eeeeee;
+            --text-muted-color: #9e9e9e;
+            --border-color: #333333;
+            --input-bg: #252525;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- 1. Layout & Card --- */
+        .container {
+            width: 90%;
+            max-width: 550px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.05em;
+        }
+
+        .card {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2.5rem 2rem;
+        }
+
+        .instructions {
+            font-size: 0.85rem;
+            color: var(--text-muted-color);
+            margin-bottom: 2rem;
+            text-align: left;
+            background: rgba(255,255,255,0.03);
+            padding: 1rem;
+            border-radius: 4px;
+        }
+
+        /* --- 2. Game Elements --- */
+        #point {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+        }
+
+        #word_display {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 0.2rem;
+        }
+
+        #word_romazi_display {
+            font-size: 1.1rem;
+            color: var(--text-muted-color);
+            font-family: 'Consolas', 'Monaco', monospace;
+            margin-bottom: 1.5rem;
+            min-height: 1.5em;
+        }
+
+        /* --- 3. Input & Buttons --- */
+        input[type="text"] {
+            background-color: var(--input-bg);
+            color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0.8rem;
+            font-size: 1.4rem;
+            width: 100%;
+            outline: none;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+        }
+
+        #result_display {
+            margin-top: 1rem;
+            font-weight: bold;
+            font-size: 0.9rem;
+            min-height: 1.2em;
+        }
+
+        .btn-group {
+            margin-top: 2rem;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #444;
+        }
+
+        button.primary-btn {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        button.primary-btn:hover {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>まんまるタイピング</h1>
+
+        <div class="card">
+            <div class="instructions">
+                ・制限時間：5分<br>
+                ・正確にタイピングしようぜ！<br>
+                ・カスタムデータ（.ctg）の読み込みが可能です
+            </div>
+
+            <button class="primary-btn" onclick="document.getElementById('ctg_file').click();" style="margin-bottom: 1.5rem;">
+                カスタムデータの読み込み
+            </button>
+            <input type="file" id="ctg_file" accept=".ctg,.json" style="display:none">
+
+            <div id="point">得点: 0</div>
+            
+            <div id="word_display">READY</div>
+            <div id="word_romazi_display">入力してスタート</div>
+            
+            <input type="text" id="typing_input" placeholder="..." autocomplete="off">
+            
+            <div id="result_display"></div>
+
+            <div class="btn-group">
+                <button id="bgm_toggle">BGM: 再生</button>
+                <button id="mute_toggle">音: ON</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+// --- ロジック部分はそのまま維持 ---
+let point = 0;
+let gameStarted = false;
+const word_romazi_display = document.getElementById("word_romazi_display");
+const word_display = document.getElementById("word_display");
+const typing_input = document.getElementById("typing_input");
+const result_display = document.getElementById("result_display");
+
+const typing_word = ["ばれりーなかぷちーな", "すきびでぃどっぱどっぷ", "とらられろとらら", "ぼんばるでぃーろくろこでぃーろ", "ぶるぶるぶらたぶらた", "とぅんとぅんとぅんさふーる", "らりらりらんば", "ちんがりんぐりーに", "ぷるぷるぷらちーの", "ばらばらばるべりーの", "ふりんふりんふらんちぇすこ", "ぐらぐらぐらっつぃえ", "ぴんぐぃんぐぃんぐぃーに", "ぶらぼぶらぼぶらーぼ", "すぱげってぃまえすとろ", "ぴっつぁろまーの", "じぇらーとまじしゃん", "かるぼなーらきんぐ", "らざにあごーれむ", "のっきーなふぇありー", "まんまるはへいさされた", "ふぁんたじっくふぃーりあ", "67", "かたきうそつきりー", "爆音アキ", "なぽりん"];
+const typing_word_romazi = ["barerinakapuchina", "sukibididoppadoppu", "torararerotorara", "bonbarudirokurokodiro", "buruburuburataburata", "tuntuntunsafuru", "rarirariranba", "chingaringurini", "purupurupurachino", "barabarubaruberino", "furinfurinfuranchesuko", "guraguragurattsie", "pinginginguini", "buraboburaboburabo", "supagettimaesutoro", "pittsaromano", "jeraatomajishan", "karubonaarakingu", "razaniagoremu", "nokkiinafearii", "manmaruhaheisasareta", "fantajikkufiiria", "67", "katakiusotsukirii", "bakuonaki", "naporin"];
+
+const AutoEnter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
+
+function nextWord() {
+    const randomIndex = Math.floor(Math.random() * typing_word_romazi.length);
+    word_romazi_display.textContent = typing_word_romazi[randomIndex];
+    word_display.textContent = typing_word[randomIndex];
+    typing_input.value = "";
+}
+
+// --- Audio ---
+const bgm = new Audio("audio/bgm/battle.mp3");
+bgm.loop = true;
+bgm.volume = 0.4;
+let bgmPlaying = false;
+let audioMuted = false;
+
+const seType = new Audio("audio/se/type.mp3");
+const seClear = new Audio("audio/se/clear.mp3");
+const seHit = new Audio("audio/se/hit.mp3");
+
+function startBgmIfNeeded() {
+    if (!gameStarted) {
+        start();
+        gameStarted = true;
+    }
+    if (!bgmPlaying && !audioMuted) {
+        bgm.play().then(()=> { bgmPlaying = true; document.getElementById("bgm_toggle").textContent = "BGM: 停止"; }).catch(()=>{});
+    }
+}
+
+document.getElementById("bgm_toggle").addEventListener("click", () => {
+    if (bgmPlaying) {
+        bgm.pause();
+        bgmPlaying = false;
+        document.getElementById("bgm_toggle").textContent = "BGM: 再生";
+    } else {
+        bgm.play().then(()=> { bgmPlaying = true; document.getElementById("bgm_toggle").textContent = "BGM: 停止"; }).catch(()=>{});
+    }
+});
+
+document.getElementById("mute_toggle").addEventListener("click", () => {
+    audioMuted = !audioMuted;
+    [bgm, seType, seClear, seHit].forEach(a => a.muted = audioMuted);
+    document.getElementById("mute_toggle").textContent = audioMuted ? "音: OFF" : "音: ON";
+});
+
+typing_input.addEventListener("keydown", (e) => {
+    if (e.key.length === 1) {
+        seType.currentTime = 0; seType.play().catch(()=>{});
+        startBgmIfNeeded();
+    }
+});
+
+typing_input.addEventListener("input", () => {
+    const val = typing_input.value;
+    const target = word_romazi_display.textContent;
+    
+    if (val === target && target !== "入力してスタート") {
+        point++;
+        document.getElementById("point").textContent = "得点: " + point;
+        result_display.textContent = "SUCCESS";
+        result_display.style.color = "var(--accent-color)";
+        seClear.currentTime = 0; seClear.play().catch(()=>{});
+        typing_input.dispatchEvent(AutoEnter); 
+        nextWord();
+    } else if (val !== target.substring(0, val.length)) {
+        result_display.textContent = "MISS";
+        result_display.style.color = "var(--error-color)";
+        seHit.currentTime = 0; seHit.play().catch(()=>{});
+    } else {
+        result_display.textContent = "";
+    }
+});
+
+document.getElementById('ctg_file').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const fr = new FileReader();
+    fr.onload = () => {
+        try {
+            const data = JSON.parse(fr.result);
+            if (!Array.isArray(data.words)) return;
+            typing_word.length = 0;
+            typing_word_romazi.length = 0;
+            data.words.forEach((w,i) => {
+                typing_word.push(w);
+                typing_word_romazi.push(data.romaji ? data.romaji[i] : w);
+            });
+            point = 0;
+            document.getElementById('point').textContent = '得点: 0';
+            nextWord();
+        } catch(err) { alert('読み込みエラー'); }
+    };
+    fr.readAsText(file, 'utf-8');
+});
+
+function start() {
+    nextWord();
+    setTimeout(() => {
+        const finalScore = point;
+        document.querySelector(".card").innerHTML = `<h3>終了！</h3><p style="margin: 20px 0;">最終スコア: ${finalScore} 点</p><button onclick="location.reload()">もう一度プレイ</button>`;
+        if (bgmPlaying) { bgm.pause(); bgmPlaying = false; }
+    }, 300000);
+}
+</script>
+</body>
+</html>

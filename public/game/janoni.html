@@ -1,0 +1,131 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>じゃんけん鬼ごっこオンライン</title>
+        <link rel="stylesheet" type="text/css" href="../styles/game.css">
+        <script src=""></script>
+    </head>
+    <body> 
+        <div id="menu">
+            <button onclick="joinGame()">参加する</button>
+            <p id="statusMessage"></p>
+        </div>
+        <canvas id="game" width="640" height="480"></canvas>
+        <script src="../socket.io/socket.io.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
+        <script>
+            const map = [
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,1],
+  [1,1,1,1,1,1,1,1,1,1]
+];
+
+
+            const socket = io(); 
+            socket.on('connect', () => {
+                console.log('サーバーに接続されました。');
+            });
+
+            socket.on('disconnect', () => {
+                console.log('サーバーから切断されました。');
+            });
+
+            function joinGame() {
+                socket.emit('join_game');
+                document.getElementById('statusMessage').innerText = 'ゲームをマッチング中...';
+            }
+
+            socket.on('game_started', () => {
+                document.getElementById('statusMessage').innerText = 'ゲームが開始されました。';
+                console.log('ゲームが開始されました。');
+                startGame();
+                let players = 0; 
+
+                
+
+                // ここにゲーム開始のロジックを追加します
+            })
+            
+            function startGame() {
+                loop();
+            }
+
+            const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const TILE = 32;
+let camera = { x: 0, y: 0 };
+
+const tiles = {
+  0: "#222",
+  1: "#555"
+};
+
+function draw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  for (let y = 0; y < map.length; y++) {
+    for (let x = 0; x < map[y].length; x++) {
+      const t = map[y][x];
+      ctx.fillStyle = tiles[t];
+      ctx.fillRect(
+        x*TILE - camera.x,
+        y*TILE - camera.y,
+        TILE, TILE
+      );
+    }
+  }
+
+  // プレイヤー
+  ctx.fillStyle = "red";
+  ctx.fillRect(player.x - camera.x, player.y - camera.y, 28, 28);
+}
+
+let player = { x: 64, y: 64, w: 28, h: 28, speed: 2 };
+const keys = {};
+
+addEventListener("keydown", e => keys[e.key] = true);
+addEventListener("keyup", e => keys[e.key] = false);
+
+function update() {
+  let nx = player.x;
+  let ny = player.y;
+
+  if (keys["ArrowLeft"]) nx -= player.speed;
+  if (keys["ArrowRight"]) nx += player.speed;
+  if (keys["ArrowUp"]) ny -= player.speed;
+  if (keys["ArrowDown"]) ny += player.speed;
+
+  if (!collides(nx, ny)) {
+    player.x = nx;
+    player.y = ny;
+  }
+
+  camera.x = player.x - canvas.width / 2;
+  camera.y = player.y - canvas.height / 2;
+}
+
+function collides(nx, ny) {
+  const tx1 = Math.floor(nx / TILE);
+  const ty1 = Math.floor(ny / TILE);
+  const tx2 = Math.floor((nx+player.w)/TILE);
+  const ty2 = Math.floor((ny+player.h)/TILE);
+
+  return map[ty1]?.[tx1] === 1 ||
+         map[ty1]?.[tx2] === 1 ||
+         map[ty2]?.[tx1] === 1 ||
+         map[ty2]?.[tx2] === 1;
+}
+
+function loop() {
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+loop();
+
+        </script>
+    </body>
+</html>
