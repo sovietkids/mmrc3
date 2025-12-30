@@ -11,6 +11,7 @@ const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
 const session = require("express-session");
+const { randomUUID } = require('crypto');
 
 /* ===============================
  * App / Server
@@ -42,6 +43,11 @@ const messagesFile = path.join(DATA_DIR, 'messages.json');
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
 const DISCORD_REDIRECT_URI = "http://cube.ssnetwork.io:54290/auth/discord/callback";
+
+/* ===============================
+  * janoni
+  * =============================== */
+let janoni_players_count = 0;
 
 
 app.get("/__whoami", (req, res) => {
@@ -253,6 +259,15 @@ app.get('/search-images', async (req, res) => {
 const server = http.createServer(app);
 const io = new Server(server);
 
+let roomID = null;
+
+function roomID_generate() {
+  roomID = randomUUID();
+  console.log("Generated room ID:", roomID);
+  return roomID;
+}
+
+
 /* ===============================
  * Socket.IO
  * =============================== */
@@ -339,8 +354,22 @@ io.on('connection', socket => {
       socket.emit("gokuhi_auth_failed", { id });
     }
   });
-});
 
+  socket.on("join_game", () => {
+    janoni_players_count++;
+    if (janoni_players_count === 3) {
+      socket.emit("game_started");
+      janoni_players_count = 0;
+      roomID_generate();
+    }
+    console.log("User joined the game:", socket.id + ", players:", janoni_players_count);
+  });
+
+  socket.on("leave_game", () => {
+    janoni_players_count--;
+    console.log("User left the game:", socket.id + ", players:", janoni_players_count);
+  });
+});
 
 //====================================
 
@@ -350,6 +379,9 @@ io.on('connection', socket => {
 /* ===============================
  * Start
  * =============================== */
+
+roomID_generate();
+
 server.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
 });
