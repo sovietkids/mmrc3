@@ -1,7 +1,7 @@
-const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));//timeはミリ秒
+const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
 
 // =====================
-// カメラ（画面左上が見ているワールド座標）
+// カメラ
 // =====================
 let camera_x = 0;
 let camera_y = 0;
@@ -18,9 +18,11 @@ const ctx = canvas.getContext("2d");
 // =====================
 const keys = {};
 let isDrawing = false;
+let lastDrawTime = 0;
 
 // =====================
-// 描画データ [x, y, w, h, color]
+// 描画データ [type, x, y, color, text]
+// type: 1 = rect, 0 = text
 // =====================
 let edge_positions_renderer = [];
 
@@ -41,88 +43,82 @@ function resizeCanvas() {
     canvas.width  = Math.floor(width * dpr);
     canvas.height = Math.floor(height * dpr);
 
-    // CSSピクセル基準に統一
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
 }
 
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
 // =====================
-// メインループ（※1回だけ起動）
+// メインループ
 // =====================
 function draw() {
     updateCamera();
 
-    // DPR考慮した正しい消去
-    ctx.clearRect(
-        0,
-        0,
-        canvas.width / dpr,
-        canvas.height / dpr
-    );
+    ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
 
-    // 描画
-    for (let i = 0; i < edge_positions_renderer.length; i += 3) {
-        const worldX = edge_positions_renderer[i];
-        const worldY = edge_positions_renderer[i + 1];
-        const color  = edge_positions_renderer[i + 2];
+    for (let i = 0; i < edge_positions_renderer.length; i += 5) {
+        const type = edge_positions_renderer[i];
+        const worldX = edge_positions_renderer[i + 1];
+        const worldY = edge_positions_renderer[i + 2];
+        const color  = edge_positions_renderer[i + 3];
+        const text   = edge_positions_renderer[i + 4];
 
         const draw_x = worldX - camera_x;
         const draw_y = worldY - camera_y;
 
         ctx.fillStyle = color;
-        ctx.fillRect(draw_x, draw_y, 15, 15);
+
+        if (type === 1) {
+            ctx.fillRect(draw_x, draw_y, 15, 15);
+        } else if (type === 0) {
+            ctx.font = "60px Arial";
+            ctx.fillText(text, draw_x, draw_y);
+        }
     }
 
     requestAnimationFrame(draw);
 }
-
-// ⭐ draw はここで1回だけ
 draw();
 
 // =====================
-// マウス描画
+// マウス描画（スロットリング）
 // =====================
 canvas.addEventListener("mousedown", () => isDrawing = true);
 canvas.addEventListener("mouseup",   () => isDrawing = false);
 canvas.addEventListener("mouseleave",() => isDrawing = false);
 canvas.addEventListener("mousemove", handleMouseMove);
 
-async function handleMouseMove(e) {
+function handleMouseMove(e) {
     if (!isDrawing) return;
+
+    const now = Date.now();
+    if (now - lastDrawTime < 16) return;
+    lastDrawTime = now;
 
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    // 画面 → ワールド
     const worldX = x + camera_x;
     const worldY = y + camera_y;
 
     const color = document.getElementById("colorPicker").value;
-    edge_positions_renderer.push(worldX, worldY, color);
-    await sleep(1000); // 連続描画を防ぐためのウェイト
+    edge_positions_renderer.push(1, worldX, worldY, color, null);
     upload();
-
-};
+}
 
 // =====================
 // キー入力
 // =====================
-window.addEventListener("keydown", (e) => {
-    keys[e.key.toLowerCase()] = true;
-});
-
-window.addEventListener("keyup", (e) => {
-    keys[e.key.toLowerCase()] = false;
-});
+window.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
+window.addEventListener("keyup",   e => keys[e.key.toLowerCase()] = false);
 
 // =====================
-// カメラ操作（視点移動）
+// カメラ操作
 // =====================
 function updateCamera() {
-    console.log("Camera:", camera_x, camera_y);
     const speed = parseInt(document.getElementById("speedInput")?.value) || 5;
 
     if (keys["w"] || keys["arrowup"])    camera_y -= speed;
@@ -132,79 +128,64 @@ function updateCamera() {
 }
 
 // =====================
-// テレポート（※ draw() を呼ばない）
+// テレポート
 // =====================
 function TeleportCamera(x, y) {
-    console.log("テレポート:", x, y);
+    camera_x = Number(x);
+    camera_y = Number(y);
 
-    camera_x = x;
-    camera_y = y;
-
-        // 念のため NaN ガード
     if (!Number.isFinite(camera_x)) camera_x = 0;
     if (!Number.isFinite(camera_y)) camera_y = 0;
 
-    // キー状態リセット（前に言った保険）
     for (const k in keys) keys[k] = false;
 }
 
 function tp() {
-    const xInput = document.getElementById("tpX");
-    const yInput = document.getElementById("tpY");
-
-    if (!xInput || !yInput) {
-        console.error("TP input not found");
-        return;
-    }
-
-    const x = Number(xInput.value);
-    const y = Number(yInput.value);
-
-    if (!Number.isFinite(x) || !Number.isFinite(y)) {
-        console.error("Invalid TP value", x, y);
-        return;
-    }
-
+    const x = Number(document.getElementById("tpX").value);
+    const y = Number(document.getElementById("tpY").value);
     TeleportCamera(x, y);
-};
+}
 
-function TextDraw() {
-    const textInput = document.getElementById("TextDrawInput");
-      ctx.font = "48px serif";
-      ctx.fillText(textInput.value, camera_x, camera_y);
-      console.log("テキスト描画:", textInput.value);
-};
+// =====================
+// テキスト描画
+// =====================
+function textrender() {
+    const textInput = document.getElementById("text");
+    const color = document.getElementById("colorPicker").value;
+    const text = textInput.value.trim();
+    if (!text) return;
 
+    edge_positions_renderer.push(0, camera_x, camera_y, color, text);
+    upload();
+    textInput.value = "";
+}
+
+// =====================
+// JSON Export
+// =====================
 function json_export() {
-    // 1. JSON文字列に変換（null, 2 を入れると整形されて読みやすくなります）
     const dataStr = JSON.stringify(edge_positions_renderer, null, 2);
-    
-    // 2. Blobオブジェクトを作成（大容量でも安定します）
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    
-    const exportFileDefaultName = 'oekaki_data.json';
-    const linkElement = document.createElement('a');
-    
-    linkElement.href = url;
-    linkElement.download = exportFileDefaultName;
-    
-    // 3. 確実にクリックイベントを発火させ、終わったらメモリを解放する
-    document.body.appendChild(linkElement); // 一時的にDOMに追加（Firefox対策）
-    linkElement.click();
-    document.body.removeChild(linkElement);
-    URL.revokeObjectURL(url); // メモリ解放
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'oekaki_data.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 }
 
 document.getElementById("exportButton").addEventListener("click", json_export);
 
 // =====================
-// socket 通信
+// socket
 // =====================
 function upload() {
     socket.emit("uploadList", edge_positions_renderer);
 }
 
-socket.on("updateList", (list) => {
-    edge_positions_renderer = list;
+socket.on("updateList", list => {
+    if (Array.isArray(list)) edge_positions_renderer = list;
 });

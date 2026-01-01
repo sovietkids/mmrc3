@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <title>24ch第二世代</title>
+        <link rel="icon" href="favicon.ico">
+        <meta charset="UTF-8">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@
+400;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="chat.css">
+        <meta name="google-site-verification" content="gST0QPJesVblRhV4G2l2TE-Ia1hnFn4Y3BDW9qLEfyw" />
+    </head>
+    <body>
+        <div>
+            <div id="messages">
+
+            </div>
+            <input type="text" id="name" placeholder="名前"><input id="messageinput" type="text" placeholder="メッセージ"><button onclick="messagesend()">送信</button>
+            <script src="/socket.io/socket.io.js"></script>
+            <script src="chat.js"></script>
+        </div>
+    </body>
+</html>
