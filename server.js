@@ -334,6 +334,8 @@ io.on('connection', socket => {
   });
   console.log('New client connected:', socket.id);
 
+  //ここから上はもう使わない
+
   socket.on('uploadList', list => {
     drawingData = list;
     safeWriteJSON(drawingFile, drawingData);
@@ -370,8 +372,13 @@ io.on('connection', socket => {
     janoni_players_count--;
     console.log("User left the game:", socket.id + ", players:", janoni_players_count);
   });
-});
 
+  socket.on("chat message2", (msg, username) => {
+
+    io.emit("chat message2", msg, username);
+  }
+);
+});
 //====================================
 
 
@@ -386,3 +393,4 @@ roomID_generate();
 server.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
 });
+
