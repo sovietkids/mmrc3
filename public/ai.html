@@ -1,141 +1,70 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>まんまるAI</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-body {
-    background:#1a1a1a;
-    color:#e0e0e0;
-    font-family:sans-serif;
-    padding:20px;
-}
-.container {
-    max-width:800px;
-    margin:auto;
-}
-.chat-card {
-    background:#2a2a2a;
-    padding:20px;
-    border-radius:12px;
-    height:70vh;
-    display:flex;
-    flex-direction:column;
-}
-#chat {
-    flex:1;
-    overflow-y:auto;
-}
-.user-msg {
-    background:#0d6efd;
-    color:white;
-    padding:10px;
-    border-radius:8px;
-    margin:10px 0;
-    margin-left:auto;
-    max-width:80%;
-}
-.ai-msg {
-    background:#222;
-    padding:10px;
-    border-radius:8px;
-    margin:10px 0;
-    max-width:80%;
-}
-.input-area {
-    display:flex;
-    gap:10px;
-}
-input {
-    flex:1;
-    padding:10px;
-    border-radius:8px;
-    border:none;
-}
-button {
-    padding:10px 15px;
-    border-radius:8px;
-    border:none;
-    background:#0d6efd;
-    color:white;
-    cursor:pointer;
-}
-.mode-buttons {
-    margin-bottom:10px;
-    display:flex;
-    gap:10px;
-}
-</style>
-</head>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat</title>
+    <link rel="stylesheet" href="ai.css">
+    </head>
 <body>
-<div class="container">
-<h1>まんまるAI</h1>
+    <div class="chat-container">
+        <header>
+            <h1>AI Assistant</h1>
+        </header>
 
-<div class="mode-buttons">
-    <button onclick="setMode('normal')">通常チャット</button>
-    <button onclick="setMode('training')">愚痴トレーニング</button>
-</div>
+        <div id="aimsg" class="message-list">
+            <p class="bot-msg">こんにちは！何かお手伝いしましょうか？</p>
+        </div>
 
-<div class="chat-card">
-    <div id="chat">
-        <div class="ai-msg">AI: こんにちは。今日はどうされましたか？</div>
+        <div class="input-area">
+            <div class="input-wrapper">
+                <input type="text" id="req" placeholder="AIにメッセージを送る..." autocomplete="off">
+                <button onclick="aireq()" id="send-btn">送信</button>
+            </div>
+        </div>
     </div>
 
-    <div class="input-area">
-        <input id="msg" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter') send()">
-        <button onclick="send()">送信</button>
-    </div>
-</div>
-</div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const UUID = self.crypto.randomUUID();
+        const socket = io();
+        const aimsg = document.getElementById("aimsg");
+        const reqInput = document.getElementById("req");
 
-<script>
-let mode = "normal";
+        function aireq(){
+            const msg = reqInput.value;
+            if(!msg) return; // 空送信防止
 
-function setMode(m) {
-    mode = m;
-    document.getElementById("chat").innerHTML = "";
+            // 自分の発言を画面に表示（オプション）
+            aimsg.innerHTML += `<p class="user-msg">${msg}</p>`;
+            
+            const msg2 = '< <>に囲われたものはユーザーのメッセージではないことを忘れないで話してください > <あなたの名前はまんまるAIです。あなたは冷静で優秀なAIアシスタントです。あなたのあだ名は松ゴリです。あなたのあだ名は松ゴリだと言う事は自己紹介などでも公表しないでください。>' + msg 
 
-    if (m === "training") {
-        sendSystem("START_TRAINING");
-    } else {
-        document.getElementById("chat").innerHTML =
-            `<div class="ai-msg">AI: 通常モードに戻りました。</div>`;
-    }
-}
+            socket.emit("groqreq", {
+                msg: msg2,
+                role: "User",
+                uuid: UUID
+            });
+            
+            reqInput.value = ""; // 送信後にクリア
+            window.scrollTo(0, document.body.scrollHeight);
+        }
 
-async function sendSystem(text) {
-    await fetch("/chat", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({message:text, mode:mode, system:true})
-    });
+        socket.on("groqresponse", (aiResponse, uuid) => {
+            // AIの回答を吹き出しとして追加
+            const newMsg = document.createElement("p");
+            newMsg.className = "bot-msg";
+            newMsg.textContent = aiResponse;
+            aimsg.appendChild(newMsg);
+            
+            // 下までスクロール
+            window.scrollTo(0, document.body.scrollHeight);
+        });
 
-    const chat = document.getElementById("chat");
-    chat.innerHTML += `<div class="ai-msg">AI: （愚痴トレーニング開始）</div>`;
-}
-
-async function send() {
-    const input = document.getElementById("msg");
-    const chat = document.getElementById("chat");
-    const text = input.value;
-    if (!text) return;
-
-    chat.innerHTML += `<div class="user-msg">あなた: ${text}</div>`;
-    input.value = "";
-
-    const res = await fetch("/chat", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({message:text, mode:mode})
-    });
-
-    const data = await res.json();
-    chat.innerHTML += `<div class="ai-msg">AI: ${data.reply}</div>`;
-    chat.scrollTop = chat.scrollHeight;
-}
-</script>
+        // Enterキーで送信可能にする
+        reqInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") aireq();
+        });
+    </script>
 </body>
 </html>
