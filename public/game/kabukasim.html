@@ -1,0 +1,659 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="icon" href="favicon.ico">
+        <title>投資シミュレーター</title>
+<style>
+/* --- 0. Root Variables --- */
+:root {
+    --bg-color: #1a1a1a;
+    --card-bg-color: #2a2a2a;
+    --primary-color: #0d6efd; 
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --text-color: #e0e0e0;
+    --border-color: #3a3a3a;
+    --accent-color: #60c797;
+}
+
+/* --- 1. Global Reset & Base --- */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* メインコンテナを「カード」風に装飾 */
+div[style*="text-align: center"] {
+    background-color: var(--card-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    max-width: 500px;
+    width: 95%;
+    margin-top: 0 !important; /* インライン上書き */
+}
+
+/* --- 2. Typography --- */
+h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+p {
+    font-size: 0.95rem;
+    color: var(--text-color);
+    margin-bottom: 1.2rem;
+}
+
+/* --- 3. Status Display (Dialogs & Numbers) --- */
+#dialog, #dialog2 {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.8rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    min-height: 1.2rem;
+    border-left: 4px solid var(--accent-color);
+    margin: 10px 0;
+    text-align: left;
+}
+
+#dialog2 {
+    border-left-color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* 数値表示を強調 */
+#money, #kabuka, #kabuken {
+    background: #222;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1rem;
+    margin: 10px 0;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+#kabuka {
+    color: var(--accent-color);
+    font-size: 1.4rem;
+    border-color: rgba(96, 199, 151, 0.3);
+}
+
+/* --- 4. Interactive Elements (Buttons) --- */
+button {
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 8px;
+    padding: 0.8rem 1.5rem;
+    margin: 5px;
+    color: white;
+    background-color: #444; /* デフォルト（モード切替など） */
+}
+
+button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* 株を買うボタン */
+button[onclick^="buyStock"] {
+    background-color: var(--success-color);
+    box-shadow: 0 4px 15px rgba(25, 135, 84, 0.3);
+}
+
+/* 株を売るボタン */
+button[onclick^="sellStock"] {
+    background-color: var(--danger-color);
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+/* モード切替ボタン */
+button[onclick*="mode ="] {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+    color: #888;
+}
+
+button[onclick*="mode ="]:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* --- 5. Custom Scrollbar (Utility) --- */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-color); }
+::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+</style>
+    </head>
+    <body>
+        <div style="text-align: center; margin-top: 50px;">
+                    <h1 style="text-align: center;">投資シミュレーションゲーム</h1>
+        <p style="text-align: center;">株を売買して資産を増やそう！生活費の存在も忘れずに！</p>
+        <button onclick="mode = 'normal'; changemode()">普通なモード</button>
+        <button onclick="mode = 'caos';">カオスモード</button>
+            <p id="dialog"></p>
+            <p id="dialog2"></p>
+            <p id="money"></p>
+            <p id="kabuka">株価</p>
+            <p id="kabuken">株券:0枚</p>
+            <button onclick="buyStock()">株を買う</button>
+            <button onclick="sellStock()">株を売る</button>
+        </div>
+        <script id="script">
+            const sekabukahendou = new Audio("audio/se/hit.mp3");
+            const sekabukattariuttari = new Audio("audio/se/damage.mp3");
+
+            const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));//timeはミリ秒
+            let mode = "normal"; //normal or caos
+            let tick_passed = 0;
+            let tick = 2;
+            let kabuka = 1000
+            let random = null
+            let kabuken = 0
+            let money = 200000
+            const kabukaElement = document.getElementById("kabuka");
+            const kabukenElement = document.getElementById("kabuken");
+            const moneyElement = document.getElementById("money");
+            kabukenElement.textContent = "株券: " + kabuken + "枚";
+            moneyElement.textContent = "所持金: " + money + "円";
+
+            function changemode() {
+                if (mode === "normal") {
+                    alert2("普通なモードに変更しました。");
+                } else {
+                    alert2("カオスなモードに変更しました。");
+                }
+
+            }
+
+            function updateKabuka() {
+                sekabukahendou.currentTime = 0;
+                sekabukahendou.play();
+                kabukaElement.textContent = "現在の株価: " + kabuka + "円";
+            }
+
+            function dialogSet(msg) {
+                const dialogElement = document.getElementById("dialog");
+
+                dialogElement.textContent = msg;
+            }
+
+            function dialogSet2(msg) {
+                const dialog2Element = document.getElementById("dialog2");
+                dialog2Element.textContent = msg;
+            }
+            // override default alert to use dialogSet so existing code works without modification
+            window.alert = function(msg) { dialogSet(msg); };
+            window.alert2 = function(msg) { dialogSet2(msg); };
+
+            function buyStock() {
+                sekabukattariuttari.currentTime = 0;
+                sekabukattariuttari.play();
+
+
+                if (kabuken >= 100) {
+                    alert("これ以上株券を購入できません。");
+                    return;
+                }
+
+                if (money >= kabuka) {
+                    kabuken += 1;
+                    money -= kabuka;
+                    kabukenElement.textContent = "株券: " + kabuken + "枚";
+                    moneyElement.textContent = "所持金: " + money + "円";
+                } else {
+                    alert("所持金が不足しています。");
+                }
+
+                
+            }
+
+            function sellStock() {
+                sekabukattariuttari.currentTime = 0;
+                sekabukattariuttari.play();
+
+                if (kabuken > 0) {
+                    kabuken -= 1;
+                    money += kabuka;
+                    kabukenElement.textContent = "株券: " + kabuken + "枚";
+                    moneyElement.textContent = "所持金: " + money + "円";
+                } else {
+                    alert("売る株券がありません。");
+                }
+            }
+
+
+            async function boomevent () {
+                for (let i = 0; i < 5; i++) {
+                    kabuka += Math.floor(Math.random()*100)+100;
+                    updateKabuka();
+                    await sleep(tick * 100);
+                }
+            }
+
+            async function crashEvent() {
+                for (let i = 0; i < 5; i++) {
+                    kabuka -= Math.floor(Math.random()*100)+100;
+                    if (kabuka < 100) {
+                        kabuka = 100;
+                    }
+                    updateKabuka();
+                    await sleep(tick * 100);
+                }
+            }
+
+            function seikatuhi() {
+                if (money >= 5000) {
+                    money -= 5000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                } else {
+                    alert("生活費を支払えませんでした。ゲームオーバーです。あなたは破産しました。");
+                    location.href = "hasan.html";
+                    return;
+                }
+
+                random = Math.floor(Math.random()*50);
+
+                if (random === 0) {
+                    alert("あなたは詐欺に遭い、所持金を30000円失いました。");
+                    money -= 30000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 1) {
+                    alert("あなたは宝くじに当たり、所持金を50000円得ました。");
+                    money += 50000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 2 || random === 3 || random === 4) {
+                    alert("あなたは副業で10000円稼ぎました。");
+                    money += 10000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 5 || random === 6) {
+                    alert("あなたは病気になり、医療費として20000円支払いました。");
+                    money -= 20000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 7) {
+                    alert("あなたは友人の結婚式に招待され、30000円支払いました。");
+                    money -= 30000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 8) {
+                    alert("あなたはメルカリで不用品を売り、20000円得ました。");
+                    money += 20000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 9) {
+                    alert("あなたは飲み会に参加し、5000円支払いました。");
+                    money -= 5000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 10) {
+                    alert("あなたは交通事故に遭い、修理費として25000円支払いました。");
+                    money -= 25000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 11) {
+                    alert("あなたは副業で15000円稼ぎました。");
+                    money += 15000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 12) {
+                    alert("あなたはギャンブルで30000円失いました。");
+                    money -= 30000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 13) {
+                    alert("あなたは友人から5000円借りました。");
+                    money += 5000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 14) {
+                    alert("あなたは友人に5000円貸しました。");
+                    money -= 5000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 15) {
+                    alert("あなたは副業で20000円稼ぎました。");
+                    money += 20000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 16) {
+                    alert("あなたは飲み会に参加し、8000円支払いました。");
+                    money -= 8000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 17) {
+                    alert("あなたはメルカリで不用品を売り、15000円得ました。");
+                    money += 15000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 18) {
+                    alert("あなたは交通事故に遭い、修理費として20000円支払いました。");
+                    money -= 20000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 19) {
+                    alert("あなたは副業で12000円稼ぎました。");
+                    money += 12000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 20) {
+                    alert("あなたはギャンブルで20000円失いました。");
+                    money -= 20000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 21) {
+                    alert("あなたは友人から8000円借りました。");
+                    money += 8000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 22) {
+                    alert("あなたは友人に8000円貸しました。");
+                    money -= 8000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 23) {
+                    alert("あなたは副業で18000円稼ぎました。");
+                    money += 18000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+                
+                if (random === 24) {
+                    alert("あなたは飲み会に参加し、6000円支払いました。");
+                    money -= 6000;
+                    moneyElement.textContent = "所持金: " + money + "円";
+                }
+
+                if (random === 25) {
+    alert("あなたはフリマで500円の売上がありました。");
+    money += 500;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 26) {
+    alert("あなたは電気代を支払い、7000円減りました。");
+    money -= 7000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 27) {
+    alert("あなたは株で12000円儲けました。");
+    money += 12000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 28) {
+    alert("あなたは靴を買って9000円支払いました。");
+    money -= 9000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 29) {
+    alert("あなたは古い本を売って1500円手に入れました。");
+    money += 1500;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 30) {
+    alert("あなたは飲み会の会費で10000円支払いました。");
+    money -= 10000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 31) {
+    alert("あなたは誕生日に5000円のプレゼントをもらいました。");
+    money += 5000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 32) {
+    alert("あなたはスマホを壊して修理費15000円支払いました。");
+    money -= 15000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 33) {
+    alert("あなたはコンテストで賞金30000円を獲得しました！"); 
+    money += 30000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 34) {
+    alert("あなたは交通違反で罰金6000円支払いました。");
+    money -= 6000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 35) {
+    alert("あなたは宝くじで100000円当たりました！");
+    money += 100000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 36) {
+    alert("あなたは投資で20000円の損失が出ました。");
+    money -= 20000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 37) {
+    alert("あなたは友人に飲み代を奢り7000円支払いました。");
+    money -= 7000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 38) {
+    alert("あなたは副業で25000円稼ぎました。");
+    money += 25000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 39) {
+    alert("あなたは本を買って2000円支払いました。");
+    money -= 2000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 40) {
+    alert("税金の還付で8000円戻ってきました。");
+    money += 8000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 41) {
+    alert("車のガソリン代で4000円支払いました。");
+    money -= 4000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 42) {
+    alert("古いゲームを売って4000円手に入れました。");
+    money += 4000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 43) {
+    alert("家電のセールで20000円支払いました。");
+    money -= 20000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 44) {
+    alert("アルバイトのボーナスで15000円もらいました。");
+    money += 15000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 45) {
+    alert("飲み会で財布を落として10000円損しました。");
+    money -= 10000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 46) {
+    alert("副業で大口収入100000円が入りました。");
+    money += 100000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 47) {
+    alert("あなたは寄付で3000円支払いました。");
+    money -= 3000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 48) {
+    alert("友人に借りていた5000円を返しました。");
+    money -= 5000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 49) {
+    alert("カフェでランチに800円支払いました。");
+    money -= 800;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+
+if (random === 50) {
+    alert("投資の配当で6000円受け取りました。");
+    money += 6000;
+    moneyElement.textContent = "所持金: " + money + "円";
+}
+            }
+
+            async function konranEvent() {
+                for (let i = 0; i < 5; i++) {
+                    random = Math.floor(Math.random()*2);
+                    if (random === 0) {
+                        kabuka += Math.floor(Math.random()*510 + 300);
+                    } else {
+                        kabuka -= Math.floor(Math.random()*510 + 300);
+                        if (kabuka < 100) {
+                            kabuka = 100;
+                        }
+                    }
+
+                    updateKabuka();
+                    await sleep(tick * 100);
+                }
+            }
+
+            async function saibakougeki() {
+                for (let i = 0; i < 60; i++) {
+                    random = Math.floor(Math.random()*2);
+                    if (random === 0) {
+                        kabuka += Math.floor(Math.random()*15100 + 30000);
+                    } else {
+                        kabuka -= Math.floor(Math.random()*15100 + 30000);
+                        if (kabuka < 100) {
+                            kabuka = 100;
+                        }
+                    }
+
+                    kabuka = Math.floor(Math.rondom()*1000 + 12)
+                    updateKabuka();
+                    await sleep(tick * 100);
+                }
+                alert2("サイバー攻撃から復旧中です...");
+
+                await sleep(tick * 2500);
+                random = Math.floor(Math.random()*10) + 1000;
+            }
+            setInterval(() => {
+                if (mode === "normal") {
+                    random = Math.floor(Math.random()*400);
+                } else {
+                    random = Math.floor(Math.random()*4);
+                }
+
+                if (random === 0) {
+                    alert2("株式市場が急騰しています！");
+                    boomevent();
+                }
+
+                if (random === 1) {
+                    alert2("株式市場が急落しています！");
+                    crashEvent();
+                }
+
+                if (random === 2) {
+                    alert2("株式市場は混乱しています。");
+                    konranEvent();
+                }
+
+                if (random === 3) {
+                    console.log("debug ")
+                    alert2("株式市場にサイバー攻撃が発生しました！");
+                    saibakougeki();
+                
+                }
+
+                if (random !== 0 && random !== 1 && random !==2 && random !== 3) {
+                    alert2("株式市場は安定しています。");
+                }
+                
+                random = Math.floor(Math.random()*2);
+                if (random === 0) {
+                    kabuka += Math.floor(Math.random()*21);
+                } else {
+                    kabuka -= Math.floor(Math.random()*21);
+                    if (kabuka < 100) {
+                        kabuka = 100;
+                    }
+                }
+
+
+
+
+                updateKabuka();
+
+                tick_passed += 1;
+                if (tick_passed === 12) {
+                    console.log("ゲーム内で1日経過");
+                    seikatuhi();
+                    tick_passed = 0;
+                }
+            }, tick * 200);
+        </script>
+    </body>
+</html>
