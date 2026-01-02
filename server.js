@@ -3,6 +3,7 @@
 /* ===============================
  * Imports
  * =============================== */
+const Groq = require('groq-sdk');
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -12,6 +13,10 @@ const fs = require('fs');
 const axios = require('axios');
 const session = require("express-session");
 const { randomUUID } = require('crypto');
+
+const groq = new Groq({
+  apiKey: "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"
+});
 
 /* ===============================
  * App / Server
@@ -377,11 +382,48 @@ io.on('connection', socket => {
 
     io.emit("chat message2", msg, username);
   }
+
+  
 );
+// Socket.ioの接続部分
+  
+socket.on("groqreq", ({ msg, role, uuid }) => {
+  AIreq(socket, msg, role, uuid);
 });
-//====================================
 
 
+});
+
+// 修正ポイント2: 第1引数でsocketを受け取る
+async function AIreq(socket, msg, role, uuid) {
+  try {
+    // 修正ポイント3: msgが空または文字列でない場合の安全策
+    const safeMsg = (msg && typeof msg === 'string') ? msg : "こんにちは";
+
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "user",
+          content: safeMsg, // 安全な文字列を渡す
+        },
+      ],
+      model: "llama-3.3-70b-versatile",
+    });
+
+    // 修正ポイント4: データの取り出しパス (choices[0])
+    // 2026年現在のSDKでは、通常 choices[0].message.content で取得します
+    const aiResponse = chatCompletion.choices[0]?.message?.content || "回答が得られませんでした。";
+
+    // 結果をクライアントに送信
+    socket.emit("groqresponse", aiResponse, uuid);
+    console.log("AI回答:", aiResponse);
+
+  } catch (error) {
+    // 400エラー等の詳細をログ出力
+    console.error("エラーが発生しました:", error.message);
+    socket.emit("groqresponse", "エラーが発生しました。", uuid);
+  }
+}
 
 
 /* ===============================
